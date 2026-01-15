@@ -48,7 +48,7 @@ const CATEGORY_COLORS = {
   "Nuts & Seeds": { bg: "#d4c4a8", text: "#5c4813" }, // pastel tan
 };
 
-// Main App Component - change for testing
+// Main App Component
 export default function RecipeApp() {
   const [currentPage, setCurrentPage] = useState("home");
   const [recipes, setRecipes] = useState([]);
