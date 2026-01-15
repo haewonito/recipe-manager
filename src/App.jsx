@@ -48,7 +48,7 @@ const CATEGORY_COLORS = {
   "Nuts & Seeds": { bg: "#d4c4a8", text: "#5c4813" }, // pastel tan
 };
 
-// Main App Component
+// Main App Component - change for testing
 export default function RecipeApp() {
   const [currentPage, setCurrentPage] = useState("home");
   const [recipes, setRecipes] = useState([]);
@@ -230,7 +230,13 @@ function HomePage({ navigateTo }) {
 }
 
 // Recipe categories
-const RECIPE_CATEGORIES = ["Appetizer", "Main", "Side", "Dessert", "Combination"];
+const RECIPE_CATEGORIES = [
+  "Appetizer",
+  "Main",
+  "Side",
+  "Dessert",
+  "Combination",
+];
 
 // Recipes List Page
 function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
@@ -241,11 +247,13 @@ function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
   const [filterMainIngredient, setFilterMainIngredient] = useState("");
 
   // Get unique main ingredients from all recipes
-  const allMainIngredients = [...new Set(
-    recipes.flatMap((recipe) =>
-      recipe.mainIngredients?.map((ing) => ing.name) || []
-    )
-  )].sort();
+  const allMainIngredients = [
+    ...new Set(
+      recipes.flatMap(
+        (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || []
+      )
+    ),
+  ].sort();
 
   const filteredRecipes = recipes
     .filter(
@@ -333,7 +341,9 @@ function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
 
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex items-center gap-2">
-            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>Filter by Category:</span>
+            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
+              Filter by Category:
+            </span>
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
@@ -349,7 +359,9 @@ function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>Filter by Main Ingredient:</span>
+            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
+              Filter by Main Ingredient:
+            </span>
             <select
               value={filterMainIngredient}
               onChange={(e) => setFilterMainIngredient(e.target.value)}
@@ -953,9 +965,7 @@ function RecipeDetailPage({ recipe, navigateTo, allRecipes }) {
                         <h3 style={{ margin: 0, fontSize: "14px" }}>
                           {subRecipe.title}
                         </h3>
-                        <span
-                          style={{ fontSize: "12px", color: "#9ca3af" }}
-                        >
+                        <span style={{ fontSize: "12px", color: "#9ca3af" }}>
                           {subRecipe.category}
                         </span>
                       </div>
@@ -1394,7 +1404,14 @@ function CombinationRecipeFormPage({ navigateTo, onSave, recipes }) {
           </div>
 
           {searchTerm && filteredRecipes.length > 0 && (
-            <div className="dropdown-menu" style={{ position: "relative", maxHeight: "200px", overflowY: "auto" }}>
+            <div
+              className="dropdown-menu"
+              style={{
+                position: "relative",
+                maxHeight: "200px",
+                overflowY: "auto",
+              }}
+            >
               {filteredRecipes.map((recipe) => (
                 <div
                   key={recipe.id}
@@ -1402,7 +1419,13 @@ function CombinationRecipeFormPage({ navigateTo, onSave, recipes }) {
                   className="dropdown-item"
                 >
                   {recipe.title}
-                  <span style={{ color: "#9ca3af", marginLeft: "8px", fontSize: "12px" }}>
+                  <span
+                    style={{
+                      color: "#9ca3af",
+                      marginLeft: "8px",
+                      fontSize: "12px",
+                    }}
+                  >
                     ({recipe.category})
                   </span>
                 </div>
@@ -1412,7 +1435,9 @@ function CombinationRecipeFormPage({ navigateTo, onSave, recipes }) {
 
           {selectedRecipes.length > 0 && (
             <div className="mt-4">
-              <p style={{ fontWeight: 500, marginBottom: "8px" }}>Selected Recipes:</p>
+              <p style={{ fontWeight: 500, marginBottom: "8px" }}>
+                Selected Recipes:
+              </p>
               <div className="flex flex-col gap-2">
                 {selectedRecipes.map((recipe, index) => (
                   <div
@@ -1472,7 +1497,9 @@ function CombinationRecipeFormPage({ navigateTo, onSave, recipes }) {
                   </span>
                 ))}
                 {aggregateIngredients("necessaryIngredients").length === 0 && (
-                  <span style={{ color: "#9ca3af" }}>No necessary ingredients</span>
+                  <span style={{ color: "#9ca3af" }}>
+                    No necessary ingredients
+                  </span>
                 )}
               </div>
             </div>
@@ -1486,7 +1513,9 @@ function CombinationRecipeFormPage({ navigateTo, onSave, recipes }) {
                   </span>
                 ))}
                 {aggregateIngredients("optionalIngredients").length === 0 && (
-                  <span style={{ color: "#9ca3af" }}>No optional ingredients</span>
+                  <span style={{ color: "#9ca3af" }}>
+                    No optional ingredients
+                  </span>
                 )}
               </div>
             </div>
