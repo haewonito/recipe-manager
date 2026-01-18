@@ -8,9 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "seed": "node src/seedIngredients.js",
+    "seed:ingredients": "node src/seedIngredients.js",
     "seed:recipes": "node src/seedRecipes.js",
-    "seed:all": "node src/seedIngredients.js && node src/seedRecipes.js"
+    "seed": "node src/seedIngredients.js && node src/seedRecipes.js"
   },
   "dependencies": {
     "firebase": "^12.7.0",

@@ -20,7 +20,6 @@ import {
   doc,
 } from "firebase/firestore";
 
-// Ingredient category options
 const INGREDIENT_CATEGORIES = [
   "Meat",
   "Seafood",
@@ -34,7 +33,6 @@ const INGREDIENT_CATEGORIES = [
   "Nuts & Seeds",
 ];
 
-// Pastel colors for each category
 const CATEGORY_COLORS = {
   Meat: { bg: "#fecaca", text: "#991b1b" }, // pastel red
   Seafood: { bg: "#bfdbfe", text: "#1e40af" }, // pastel blue
@@ -48,7 +46,6 @@ const CATEGORY_COLORS = {
   "Nuts & Seeds": { bg: "#d4c4a8", text: "#5c4813" }, // pastel tan
 };
 
-// Main App Component
 export default function RecipeApp() {
   const [currentPage, setCurrentPage] = useState("home");
   const [recipes, setRecipes] = useState([]);
@@ -56,7 +53,6 @@ export default function RecipeApp() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
 
-  // Load data from storage on mount
   useEffect(() => {
     loadData();
   }, []);
