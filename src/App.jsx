@@ -33,6 +33,19 @@ const INGREDIENT_CATEGORIES = [
   "Nuts & Seeds",
 ];
 
+const UNITS = [
+  "grams",
+  "kilograms",
+  "oz",
+  "pounds",
+  "ml",
+  "liters",
+  "cups",
+  "tablespoons",
+  "teaspoons",
+  "pieces",
+];
+
 const CATEGORY_COLORS = {
   Meat: { bg: "#fecaca", text: "#991b1b" }, // pastel red
   Seafood: { bg: "#bfdbfe", text: "#1e40af" }, // pastel blue
@@ -511,6 +524,7 @@ function RecipeFormPage({
       mainIngredients: [],
       necessaryIngredients: [],
       optionalIngredients: [],
+      fullIngredientList: [],
       shortInstruction: "",
       longInstruction: "",
       longInstructionType: "text",
@@ -811,7 +825,11 @@ function CreateIngredientModal({ onClose, onCreate, initialValue }) {
             ))}
           </select>
           <div className="flex gap-4">
-            <button type="button" onClick={handleCreate} className="flex-1 btn btn-primary">
+            <button
+              type="button"
+              onClick={handleCreate}
+              className="flex-1 btn btn-primary"
+            >
               Create
             </button>
             <button
