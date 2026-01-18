@@ -100,7 +100,7 @@ export default function RecipeApp() {
       category,
     });
     const newIngredient = { id: docRef.id, name, category };
-    setIngredients([...ingredients, newIngredient]);
+    setIngredients((prevIngredients) => [...prevIngredients, newIngredient]);
     return newIngredient;
   };
 
@@ -779,8 +779,7 @@ function CreateIngredientModal({ onClose, onCreate, initialValue }) {
   const [name, setName] = useState(initialValue);
   const [category, setCategory] = useState(INGREDIENT_CATEGORIES[0]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleCreate = () => {
     if (name.trim()) {
       onCreate(name.trim(), category);
     }
@@ -790,7 +789,7 @@ function CreateIngredientModal({ onClose, onCreate, initialValue }) {
     <div className="modal-overlay">
       <div className="modal">
         <h3>Create New Ingredient</h3>
-        <form onSubmit={handleSubmit}>
+        <div>
           <input
             type="text"
             value={name}
@@ -812,7 +811,7 @@ function CreateIngredientModal({ onClose, onCreate, initialValue }) {
             ))}
           </select>
           <div className="flex gap-4">
-            <button type="submit" className="flex-1 btn btn-primary">
+            <button type="button" onClick={handleCreate} className="flex-1 btn btn-primary">
               Create
             </button>
             <button
@@ -823,7 +822,7 @@ function CreateIngredientModal({ onClose, onCreate, initialValue }) {
               Cancel
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
