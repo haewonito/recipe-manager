@@ -14,7 +14,6 @@ import RecipesPage from "./pages/RecipesPage";
 import RecipeFormPage from "./pages/RecipeFormPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
 import IngredientsPage from "./pages/IngredientsPage";
-import CombinationRecipeFormPage from "./pages/CombinationRecipeFormPage";
 
 export default function RecipeApp() {
   const [currentPage, setCurrentPage] = useState("home");
@@ -111,6 +110,7 @@ export default function RecipeApp() {
           onSave={addRecipe}
           ingredients={ingredients}
           addIngredient={addIngredient}
+          recipes={recipes}
         />
       )}
       {currentPage === "editRecipe" && editingRecipe && (
@@ -136,13 +136,6 @@ export default function RecipeApp() {
           updateIngredient={updateIngredient}
           deleteIngredient={deleteIngredient}
           navigateTo={navigateTo}
-        />
-      )}
-      {currentPage === "createCombination" && (
-        <CombinationRecipeFormPage
-          navigateTo={navigateTo}
-          onSave={addRecipe}
-          recipes={recipes.filter((r) => r.category !== "Combination")}
         />
       )}
     </div>

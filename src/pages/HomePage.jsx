@@ -25,14 +25,7 @@ export default function HomePage({ navigateTo }) {
           onClick={() => navigateTo("createRecipe")}
         >
           <h2>Create Recipe</h2>
-          <p>Add a new recipe to your collection</p>
-        </div>
-        <div
-          className="menu-card green"
-          onClick={() => navigateTo("createCombination")}
-        >
-          <h2>Create Combination Recipe</h2>
-          <p>Combine multiple recipes into one meal</p>
+          <p>Add a new recipe or combine existing recipes</p>
         </div>
         <div
           className="menu-card yellow"
