@@ -1,11 +1,44 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { ChefHat } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ChefHat, LogOut } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function HomePage() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
+  };
+
   return (
     <div className="container-small">
-      <div className="text-center mb-12 mt-8">
+      <div className="flex justify-end mb-4 mt-4">
+        <div className="flex items-center gap-4">
+          <span style={{ fontSize: "14px", color: "#6b7280" }}>
+            {user?.email}
+          </span>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-gray-600"
+            style={{
+              background: "none",
+              padding: "8px 12px",
+              fontSize: "14px",
+            }}
+          >
+            <LogOut className="icon-sm" />
+            Sign Out
+          </button>
+        </div>
+      </div>
+
+      <div className="text-center mb-12">
         <ChefHat
           className="icon-3xl text-orange-600"
           style={{ margin: "0 auto 16px" }}

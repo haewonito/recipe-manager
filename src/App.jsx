@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { db } from "./firebase";
 import {
   collection,
@@ -10,19 +10,34 @@ import {
   doc,
 } from "firebase/firestore";
 
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import RecipesPage from "./pages/RecipesPage";
 import RecipeFormPage from "./pages/RecipeFormPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
 import IngredientsPage from "./pages/IngredientsPage";
 
-export default function RecipeApp() {
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+function AppRoutes() {
+  const { user } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [ingredients, setIngredients] = useState([]);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (user) {
+      loadData();
+    }
+  }, [user]);
 
   const loadData = async () => {
     try {
@@ -84,57 +99,86 @@ export default function RecipeApp() {
   };
 
   return (
-    <BrowserRouter>
-      <div className="min-h-screen">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route
-            path="/recipes"
-            element={
+    <div className="min-h-screen">
+      <Routes>
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/" replace /> : <LoginPage />}
+        />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes"
+          element={
+            <ProtectedRoute>
               <RecipesPage recipes={recipes} deleteRecipe={deleteRecipe} />
-            }
-          />
-          <Route
-            path="/recipes/new"
-            element={
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes/new"
+          element={
+            <ProtectedRoute>
               <RecipeFormPage
                 onSave={addRecipe}
                 ingredients={ingredients}
                 addIngredient={addIngredient}
                 recipes={recipes}
               />
-            }
-          />
-          <Route
-            path="/recipes/:id"
-            element={
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes/:id"
+          element={
+            <ProtectedRoute>
               <RecipeDetailPage recipes={recipes} />
-            }
-          />
-          <Route
-            path="/recipes/:id/edit"
-            element={
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes/:id/edit"
+          element={
+            <ProtectedRoute>
               <RecipeFormPage
                 onSave={updateRecipe}
                 ingredients={ingredients}
                 addIngredient={addIngredient}
                 recipes={recipes}
               />
-            }
-          />
-          <Route
-            path="/ingredients"
-            element={
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ingredients"
+          element={
+            <ProtectedRoute>
               <IngredientsPage
                 ingredients={ingredients}
                 addIngredient={addIngredient}
                 updateIngredient={updateIngredient}
                 deleteIngredient={deleteIngredient}
               />
-            }
-          />
-        </Routes>
-      </div>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </div>
+  );
+}
+
+export default function RecipeApp() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
