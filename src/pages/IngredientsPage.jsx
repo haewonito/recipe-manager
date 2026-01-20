@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Search, Plus, Edit2, Trash2, ArrowLeft } from "lucide-react";
 import { INGREDIENT_CATEGORIES, CATEGORY_COLORS } from "../constants";
 import CreateIngredientModal from "../components/common/CreateIngredientModal";
@@ -8,7 +9,6 @@ export default function IngredientsPage({
   addIngredient,
   updateIngredient,
   deleteIngredient,
-  navigateTo,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -74,14 +74,14 @@ export default function IngredientsPage({
   return (
     <div className="container-small">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => navigateTo("home")}
+        <Link
+          to="/"
           className="flex items-center gap-2 text-gray-600"
           style={{ background: "none" }}
         >
           <ArrowLeft className="icon-md" />
           Back to Home
-        </button>
+        </Link>
         <h1 style={{ margin: 0 }}>Manage Ingredients</h1>
         <div className="w-24"></div>
       </div>

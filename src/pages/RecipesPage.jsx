@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, Grid, List, ArrowLeft } from "lucide-react";
 import { RECIPE_CATEGORIES } from "../constants";
 import RecipeCard from "../components/recipes/RecipeCard";
 import RecipeListItem from "../components/recipes/RecipeListItem";
 
-export default function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
+export default function RecipesPage({ recipes, deleteRecipe }) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
   const [viewMode, setViewMode] = useState("grid");
@@ -54,14 +56,14 @@ export default function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
   return (
     <div className="container">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => navigateTo("home")}
+        <Link
+          to="/"
           className="flex items-center gap-2 text-gray-600"
           style={{ background: "none" }}
         >
           <ArrowLeft className="icon-md" />
           Back to Home
-        </button>
+        </Link>
         <h1 style={{ margin: 0 }}>My Recipes</h1>
         <div className="w-24"></div>
       </div>
@@ -146,12 +148,9 @@ export default function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
       {sortedRecipes.length === 0 ? (
         <div className="empty-state">
           <p className="mb-4">No recipes found</p>
-          <button
-            onClick={() => navigateTo("createRecipe")}
-            className="btn btn-primary"
-          >
+          <Link to="/recipes/new" className="btn btn-primary">
             Create Your First Recipe
-          </button>
+          </Link>
         </div>
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-3 gap-6">
@@ -159,10 +158,10 @@ export default function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              onClick={() => navigateTo("recipeDetail", recipe)}
+              onClick={() => navigate(`/recipes/${recipe.id}`)}
               onEdit={(e) => {
                 e.stopPropagation();
-                navigateTo("editRecipe", recipe);
+                navigate(`/recipes/${recipe.id}/edit`);
               }}
               onDelete={(e) => handleDelete(e, recipe.id)}
             />
@@ -175,10 +174,10 @@ export default function RecipesPage({ recipes, navigateTo, deleteRecipe }) {
               key={recipe.id}
               recipe={recipe}
               isLast={index === sortedRecipes.length - 1}
-              onClick={() => navigateTo("recipeDetail", recipe)}
+              onClick={() => navigate(`/recipes/${recipe.id}`)}
               onEdit={(e) => {
                 e.stopPropagation();
-                navigateTo("editRecipe", recipe);
+                navigate(`/recipes/${recipe.id}/edit`);
               }}
               onDelete={(e) => handleDelete(e, recipe.id)}
             />

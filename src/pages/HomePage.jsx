@@ -1,7 +1,8 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { ChefHat } from "lucide-react";
 
-export default function HomePage({ navigateTo }) {
+export default function HomePage() {
   return (
     <div className="container-small">
       <div className="text-center mb-12 mt-8">
@@ -16,24 +17,18 @@ export default function HomePage({ navigateTo }) {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="menu-card" onClick={() => navigateTo("recipes")}>
+        <Link to="/recipes" className="menu-card">
           <h2>My Recipes</h2>
           <p>View, search, and manage your recipe collection</p>
-        </div>
-        <div
-          className="menu-card amber"
-          onClick={() => navigateTo("createRecipe")}
-        >
+        </Link>
+        <Link to="/recipes/new" className="menu-card amber">
           <h2>Create Recipe</h2>
           <p>Add a new recipe or combine existing recipes</p>
-        </div>
-        <div
-          className="menu-card yellow"
-          onClick={() => navigateTo("ingredients")}
-        >
+        </Link>
+        <Link to="/ingredients" className="menu-card yellow">
           <h2>View and Manage Ingredients</h2>
           <p>View and organize your ingredient list</p>
-        </div>
+        </Link>
       </div>
     </div>
   );

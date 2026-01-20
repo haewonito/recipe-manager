@@ -1,33 +1,44 @@
 import React from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Edit2, ChefHat } from "lucide-react";
 
-export default function RecipeDetailPage({ recipe, navigateTo, allRecipes }) {
+export default function RecipeDetailPage({ recipes }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const recipe = recipes.find((r) => r.id === id);
+
+  if (!recipe) {
+    return (
+      <div className="container-small">
+        <p>Recipe not found.</p>
+        <Link to="/recipes">Back to Recipes</Link>
+      </div>
+    );
+  }
+
   // For combination recipes, look up the full sub-recipe objects
   const subRecipesFull = recipe.isCombination
     ? (recipe.subRecipes || [])
-        .map((sub) => allRecipes.find((r) => r.id === sub.id))
+        .map((sub) => recipes.find((r) => r.id === sub.id))
         .filter(Boolean)
     : [];
 
   return (
     <div className="container-small">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => navigateTo("recipes")}
+        <Link
+          to="/recipes"
           className="flex items-center gap-2 text-gray-600"
           style={{ background: "none" }}
         >
           <ArrowLeft className="icon-md" />
           Back to Recipes
-        </button>
+        </Link>
         {!recipe.isCombination && (
-          <button
-            onClick={() => navigateTo("editRecipe", recipe)}
-            className="btn btn-blue"
-          >
+          <Link to={`/recipes/${recipe.id}/edit`} className="btn btn-blue">
             <Edit2 className="icon-sm" />
             Edit Recipe
-          </button>
+          </Link>
         )}
       </div>
 
@@ -96,7 +107,7 @@ export default function RecipeDetailPage({ recipe, navigateTo, allRecipes }) {
                 {subRecipesFull.map((subRecipe) => (
                   <div
                     key={subRecipe.id}
-                    onClick={() => navigateTo("recipeDetail", subRecipe)}
+                    onClick={() => navigate(`/recipes/${subRecipe.id}`)}
                     className="card card-padding-small"
                     style={{ cursor: "pointer" }}
                   >

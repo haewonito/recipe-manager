@@ -1,23 +1,35 @@
 import React, { useState } from "react";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Search, X } from "lucide-react";
 import IngredientSelector from "../components/ingredients/IngredientSelector";
 import MeasuredIngredientSelector from "../components/ingredients/MeasuredIngredientSelector";
 
 export default function RecipeFormPage({
-  navigateTo,
   onSave,
   ingredients,
   addIngredient,
-  existingRecipe,
   recipes = [],
 }) {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("new");
 
+  const isEditing = location.pathname.includes("/edit");
+  const existingRecipe = isEditing ? recipes.find((r) => r.id === id) : null;
+
   // If editing, only show the regular form (no tabs)
-  if (existingRecipe) {
+  if (isEditing) {
+    if (!existingRecipe) {
+      return (
+        <div className="container-small">
+          <p>Recipe not found.</p>
+          <Link to="/recipes">Back to Recipes</Link>
+        </div>
+      );
+    }
     return (
       <NewRecipeForm
-        navigateTo={navigateTo}
         onSave={onSave}
         ingredients={ingredients}
         addIngredient={addIngredient}
@@ -29,14 +41,14 @@ export default function RecipeFormPage({
   return (
     <div className="container-small">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => navigateTo("home")}
+        <Link
+          to="/"
           className="flex items-center gap-2 text-gray-600"
           style={{ background: "none" }}
         >
           <ArrowLeft className="icon-md" />
           Back to Home
-        </button>
+        </Link>
         <h1 style={{ margin: 0 }}>Create Recipe</h1>
         <div className="w-24"></div>
       </div>
@@ -86,30 +98,20 @@ export default function RecipeFormPage({
       {/* Tab Content */}
       {activeTab === "new" ? (
         <NewRecipeFormContent
-          navigateTo={navigateTo}
           onSave={onSave}
           ingredients={ingredients}
           addIngredient={addIngredient}
         />
       ) : (
-        <CombinationFormContent
-          navigateTo={navigateTo}
-          onSave={onSave}
-          recipes={recipes}
-        />
+        <CombinationFormContent onSave={onSave} recipes={recipes} />
       )}
     </div>
   );
 }
 
 // Standalone form for editing (no tabs, full page layout)
-function NewRecipeForm({
-  navigateTo,
-  onSave,
-  ingredients,
-  addIngredient,
-  existingRecipe,
-}) {
+function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     creator: "",
@@ -128,7 +130,7 @@ function NewRecipeForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     await onSave(formData);
-    navigateTo("recipes");
+    navigate("/recipes");
   };
 
   const updateField = (field, value) => {
@@ -138,14 +140,14 @@ function NewRecipeForm({
   return (
     <div className="container-small">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => navigateTo("recipes")}
+        <Link
+          to="/recipes"
           className="flex items-center gap-2 text-gray-600"
           style={{ background: "none" }}
         >
           <ArrowLeft className="icon-md" />
           Back to Recipes
-        </button>
+        </Link>
         <h1 style={{ margin: 0 }}>Edit Recipe</h1>
         <div className="w-24"></div>
       </div>
@@ -271,13 +273,9 @@ function NewRecipeForm({
           <button type="submit" className="flex-1 btn btn-primary">
             Update Recipe
           </button>
-          <button
-            type="button"
-            onClick={() => navigateTo("recipes")}
-            className="btn btn-secondary"
-          >
+          <Link to="/recipes" className="btn btn-secondary">
             Cancel
-          </button>
+          </Link>
         </div>
       </form>
     </div>
@@ -285,12 +283,8 @@ function NewRecipeForm({
 }
 
 // New recipe form content (for the "Create New Recipe" tab)
-function NewRecipeFormContent({
-  navigateTo,
-  onSave,
-  ingredients,
-  addIngredient,
-}) {
+function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     creator: "",
@@ -308,7 +302,7 @@ function NewRecipeFormContent({
   const handleSubmit = async (e) => {
     e.preventDefault();
     await onSave(formData);
-    navigateTo("recipes");
+    navigate("/recipes");
   };
 
   const updateField = (field, value) => {
@@ -437,20 +431,17 @@ function NewRecipeFormContent({
         <button type="submit" className="flex-1 btn btn-primary">
           Create Recipe
         </button>
-        <button
-          type="button"
-          onClick={() => navigateTo("home")}
-          className="btn btn-secondary"
-        >
+        <Link to="/" className="btn btn-secondary">
           Cancel
-        </button>
+        </Link>
       </div>
     </form>
   );
 }
 
 // Combination recipe form content (for the "Combine Existing Recipes" tab)
-function CombinationFormContent({ navigateTo, onSave, recipes }) {
+function CombinationFormContent({ onSave, recipes }) {
+  const navigate = useNavigate();
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [creator, setCreator] = useState("");
@@ -516,7 +507,7 @@ function CombinationFormContent({ navigateTo, onSave, recipes }) {
     };
 
     await onSave(combinationRecipe);
-    navigateTo("recipes");
+    navigate("/recipes");
   };
 
   return (
@@ -671,13 +662,9 @@ function CombinationFormContent({ navigateTo, onSave, recipes }) {
         >
           Create Combination Recipe
         </button>
-        <button
-          type="button"
-          onClick={() => navigateTo("home")}
-          className="btn btn-secondary"
-        >
+        <Link to="/" className="btn btn-secondary">
           Cancel
-        </button>
+        </Link>
       </div>
     </form>
   );

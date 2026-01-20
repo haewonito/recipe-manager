@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { db } from "./firebase";
 import {
   collection,
@@ -16,11 +17,8 @@ import RecipeDetailPage from "./pages/RecipeDetailPage";
 import IngredientsPage from "./pages/IngredientsPage";
 
 export default function RecipeApp() {
-  const [currentPage, setCurrentPage] = useState("home");
   const [recipes, setRecipes] = useState([]);
   const [ingredients, setIngredients] = useState([]);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [editingRecipe, setEditingRecipe] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -85,59 +83,58 @@ export default function RecipeApp() {
     setIngredients(ingredients.filter((i) => i.id !== id));
   };
 
-  const navigateTo = (page, data = null) => {
-    setCurrentPage(page);
-    if (page === "recipeDetail") {
-      setSelectedRecipe(data);
-    } else if (page === "editRecipe") {
-      setEditingRecipe(data);
-    }
-  };
-
   return (
-    <div className="min-h-screen">
-      {currentPage === "home" && <HomePage navigateTo={navigateTo} />}
-      {currentPage === "recipes" && (
-        <RecipesPage
-          recipes={recipes}
-          navigateTo={navigateTo}
-          deleteRecipe={deleteRecipe}
-        />
-      )}
-      {currentPage === "createRecipe" && (
-        <RecipeFormPage
-          navigateTo={navigateTo}
-          onSave={addRecipe}
-          ingredients={ingredients}
-          addIngredient={addIngredient}
-          recipes={recipes}
-        />
-      )}
-      {currentPage === "editRecipe" && editingRecipe && (
-        <RecipeFormPage
-          navigateTo={navigateTo}
-          onSave={updateRecipe}
-          ingredients={ingredients}
-          addIngredient={addIngredient}
-          existingRecipe={editingRecipe}
-        />
-      )}
-      {currentPage === "recipeDetail" && selectedRecipe && (
-        <RecipeDetailPage
-          recipe={selectedRecipe}
-          navigateTo={navigateTo}
-          allRecipes={recipes}
-        />
-      )}
-      {currentPage === "ingredients" && (
-        <IngredientsPage
-          ingredients={ingredients}
-          addIngredient={addIngredient}
-          updateIngredient={updateIngredient}
-          deleteIngredient={deleteIngredient}
-          navigateTo={navigateTo}
-        />
-      )}
-    </div>
+    <BrowserRouter>
+      <div className="min-h-screen">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/recipes"
+            element={
+              <RecipesPage recipes={recipes} deleteRecipe={deleteRecipe} />
+            }
+          />
+          <Route
+            path="/recipes/new"
+            element={
+              <RecipeFormPage
+                onSave={addRecipe}
+                ingredients={ingredients}
+                addIngredient={addIngredient}
+                recipes={recipes}
+              />
+            }
+          />
+          <Route
+            path="/recipes/:id"
+            element={
+              <RecipeDetailPage recipes={recipes} />
+            }
+          />
+          <Route
+            path="/recipes/:id/edit"
+            element={
+              <RecipeFormPage
+                onSave={updateRecipe}
+                ingredients={ingredients}
+                addIngredient={addIngredient}
+                recipes={recipes}
+              />
+            }
+          />
+          <Route
+            path="/ingredients"
+            element={
+              <IngredientsPage
+                ingredients={ingredients}
+                addIngredient={addIngredient}
+                updateIngredient={updateIngredient}
+                deleteIngredient={deleteIngredient}
+              />
+            }
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
