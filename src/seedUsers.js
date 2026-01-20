@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { db } from "./firebase.js";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
@@ -42,6 +43,9 @@ async function seedUsers() {
       }
 
       await addDoc(collection(db, "users"), {
+        userName: user.userName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         password: user.password,
       });
