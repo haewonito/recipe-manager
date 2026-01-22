@@ -298,6 +298,7 @@ function AppRoutes() {
             <ProtectedRoute>
               <IngredientsPage
                 ingredients={ingredients}
+                defaultIngredients={publicIngredients}
                 addIngredient={addIngredient}
                 updateIngredient={updateIngredient}
                 deleteIngredient={deleteIngredient}

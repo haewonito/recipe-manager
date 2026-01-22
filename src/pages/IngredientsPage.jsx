@@ -6,12 +6,22 @@ import CreateIngredientModal from "../components/common/CreateIngredientModal";
 
 export default function IngredientsPage({
   ingredients,
+  defaultIngredients = [],
   addIngredient,
   updateIngredient,
   deleteIngredient,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [showDefaultIngredients, setShowDefaultIngredients] = useState(true);
+
+  // Combine user ingredients with default ingredients (marked as isDefault)
+  const allIngredients = [
+    ...ingredients.map((ing) => ({ ...ing, isDefaultIngredient: false })),
+    ...(showDefaultIngredients
+      ? defaultIngredients.map((ing) => ({ ...ing, isDefaultIngredient: true }))
+      : []),
+  ];
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
@@ -28,7 +38,7 @@ export default function IngredientsPage({
     }
   };
 
-  const filteredIngredients = ingredients
+  const filteredIngredients = allIngredients
     .filter((ing) => ing.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter((ing) => !filterCategory || ing.category === filterCategory)
     .sort((a, b) => {
@@ -105,22 +115,36 @@ export default function IngredientsPage({
             New Ingredient
           </button>
         </div>
-        <div className="flex items-center gap-2">
-          <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
-            Filter by Category:
-          </span>
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            style={{ minWidth: "150px" }}
-          >
-            <option value="">All</option>
-            {INGREDIENT_CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
+              Filter by Category:
+            </span>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              style={{ minWidth: "150px" }}
+            >
+              <option value="">All</option>
+              {INGREDIENT_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={showDefaultIngredients}
+              onChange={(e) => setShowDefaultIngredients(e.target.checked)}
+              style={{ width: "16px", height: "16px" }}
+            />
+            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
+              Show default ingredients
+            </span>
+          </label>
         </div>
       </div>
 
@@ -249,6 +273,10 @@ export default function IngredientsPage({
                       Cancel
                     </button>
                   </>
+                ) : ing.isDefaultIngredient ? (
+                  <span style={{ color: "#9ca3af", fontSize: "12px", padding: "8px" }}>
+                    Read-only
+                  </span>
                 ) : (
                   <>
                     <button

@@ -10,7 +10,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(to bottom right, #228B22, #2d5a2d);
+  background: #F5F5F5;
   min-height: 100vh;
 }
 
@@ -145,7 +145,7 @@ body {
 
 /* Cards and Containers */
 .card {
-  background: white;
+  background: #f0fdf4;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -340,8 +340,8 @@ label {
 
 /* Menu Cards */
 .menu-card {
-  background: #fed7aa;
-  border: 2px solid #fdba74;
+  background: #dcfce7;
+  border: 2px solid #86efac;
   border-radius: 12px;
   padding: 32px;
   cursor: pointer;
@@ -349,27 +349,27 @@ label {
 }
 
 .menu-card:hover {
-  background: #fdba74;
+  background: #bbf7d0;
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
 .menu-card.amber {
-  background: #fde68a;
-  border-color: #fcd34d;
+  background: #d1fae5;
+  border-color: #6ee7b7;
 }
 
 .menu-card.amber:hover {
-  background: #fcd34d;
+  background: #a7f3d0;
 }
 
 .menu-card.yellow {
-  background: #fef08a;
-  border-color: #fde047;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
 }
 
 .menu-card.yellow:hover {
-  background: #fde047;
+  background: #d1fae5;
 }
 
 .menu-card.green {
@@ -394,7 +394,7 @@ label {
 
 /* Recipe Cards */
 .recipe-card {
-  background: white;
+  background: #f0fdf4;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -409,7 +409,7 @@ label {
 
 .recipe-card-image {
   height: 192px;
-  background: linear-gradient(to bottom right, #fed7aa, #fde68a);
+  background: linear-gradient(to bottom right, #bbf7d0, #6ee7b7);
   display: flex;
   align-items: center;
   justify-content: center;
