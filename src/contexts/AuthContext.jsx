@@ -6,7 +6,7 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { auth, googleProvider, db } from "../firebase";
 
 const AuthContext = createContext();
@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
 
       if (authUser) {
         // Check if user has a profile in Firestore
-        const profile = await fetchUserProfile(authUser.uid);
+        const profile = await fetchUserProfile(authUser.uid, authUser.email);
         setUserProfile(profile);
       } else {
         setUserProfile(null);
@@ -38,12 +38,27 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  const fetchUserProfile = async (uid) => {
+  const fetchUserProfile = async (uid, email) => {
     try {
+      // First try to find by UID (new format)
       const userDoc = await getDoc(doc(db, "users", uid));
       if (userDoc.exists()) {
         return { id: userDoc.id, ...userDoc.data() };
       }
+
+      // Fallback: find by email (old format)
+      if (email) {
+        const usersQuery = query(
+          collection(db, "users"),
+          where("email", "==", email)
+        );
+        const snapshot = await getDocs(usersQuery);
+        if (!snapshot.empty) {
+          const userDocSnap = snapshot.docs[0];
+          return { id: userDocSnap.id, ...userDocSnap.data() };
+        }
+      }
+
       return null;
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -59,6 +74,7 @@ export function AuthProvider({ children }) {
       firstName: profileData.firstName,
       lastName: profileData.lastName,
       userName: profileData.userName,
+      role: "regularUser",
       authProvider: user.providerData[0]?.providerId || "unknown",
       createdAt: new Date().toISOString(),
     };

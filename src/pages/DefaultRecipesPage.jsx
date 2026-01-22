@@ -1,35 +1,25 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, Grid, List, ArrowLeft, Copy, Check } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, Grid, List, ArrowLeft, Plus, Check } from "lucide-react";
 import { RECIPE_CATEGORIES } from "../constants";
-import PublicRecipeCard from "../components/recipes/PublicRecipeCard";
-import PublicRecipeListItem from "../components/recipes/PublicRecipeListItem";
+import DefaultRecipeCard from "../components/recipes/DefaultRecipeCard";
+import DefaultRecipeListItem from "../components/recipes/DefaultRecipeListItem";
 
-export default function RecipesToStartPage({ publicRecipes, copyRecipe, userRecipes }) {
-  const navigate = useNavigate();
+export default function DefaultRecipesPage({ defaultRecipes, copyRecipe, userRecipes }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
   const [viewMode, setViewMode] = useState("grid");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterMainIngredient, setFilterMainIngredient] = useState("");
-  const [filterCreator, setFilterCreator] = useState("");
-  const [filterType, setFilterType] = useState("");
   const [copyingId, setCopyingId] = useState(null);
   const [copiedIds, setCopiedIds] = useState(new Set());
 
-  // Get unique main ingredients from all public recipes
+  // Get unique main ingredients from all default recipes
   const allMainIngredients = [
     ...new Set(
-      publicRecipes.flatMap(
+      defaultRecipes.flatMap(
         (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || []
       )
-    ),
-  ].sort();
-
-  // Get unique creators from all public recipes
-  const allCreators = [
-    ...new Set(
-      publicRecipes.map((recipe) => recipe.creator).filter(Boolean)
     ),
   ].sort();
 
@@ -38,10 +28,10 @@ export default function RecipesToStartPage({ publicRecipes, copyRecipe, userReci
     return userRecipes.some((r) => r.sourceRecipeId === recipeId) || copiedIds.has(recipeId);
   };
 
-  const filteredRecipes = publicRecipes
+  const filteredRecipes = defaultRecipes
     .filter(
       (recipe) =>
-        recipe.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         recipe.creator?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((recipe) => !filterCategory || recipe.category === filterCategory)
@@ -49,24 +39,17 @@ export default function RecipesToStartPage({ publicRecipes, copyRecipe, userReci
       (recipe) =>
         !filterMainIngredient ||
         recipe.mainIngredients?.some((ing) => ing.name === filterMainIngredient)
-    )
-    .filter((recipe) => !filterCreator || recipe.creator === filterCreator)
-    .filter((recipe) => {
-      if (!filterType) return true;
-      if (filterType === "default") return recipe.isDefault === true;
-      if (filterType === "public") return recipe.isPublic === true;
-      return true;
-    });
+    );
 
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
     if (sortBy === "category") {
-      return a.category.localeCompare(b.category);
+      return (a.category || "").localeCompare(b.category || "");
     } else if (sortBy === "mainIngredients") {
-      const aMain = a.mainIngredients[0]?.name || "";
-      const bMain = b.mainIngredients[0]?.name || "";
+      const aMain = a.mainIngredients?.[0]?.name || "";
+      const bMain = b.mainIngredients?.[0]?.name || "";
       return aMain.localeCompare(bMain);
     }
-    return a.title.localeCompare(b.title);
+    return (a.title || "").localeCompare(b.title || "");
   });
 
   const handleCopy = async (e, recipe) => {
@@ -95,12 +78,12 @@ export default function RecipesToStartPage({ publicRecipes, copyRecipe, userReci
           <ArrowLeft className="icon-md" />
           Back to Home
         </Link>
-        <h1 style={{ margin: 0 }}>Recipes To Start</h1>
+        <h1 style={{ margin: 0 }}>Default Recipes to Start</h1>
         <div className="w-24"></div>
       </div>
 
       <p className="text-gray-600 mb-6 text-center">
-        Browse recipes shared by other users. Copy any recipe to add it to your collection and make it your own.
+        View, search and add to your recipes for easy start.
       </p>
 
       <div className="card card-padding-small mb-6">
@@ -177,54 +160,20 @@ export default function RecipesToStartPage({ publicRecipes, copyRecipe, userReci
               ))}
             </select>
           </div>
-
-          <div className="flex items-center gap-2">
-            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
-              Filter by Creator:
-            </span>
-            <select
-              value={filterCreator}
-              onChange={(e) => setFilterCreator(e.target.value)}
-              style={{ minWidth: "120px" }}
-            >
-              <option value="">All</option>
-              {allCreators.map((creator) => (
-                <option key={creator} value={creator}>
-                  {creator}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
-              Filter by Type:
-            </span>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              style={{ minWidth: "120px" }}
-            >
-              <option value="">All</option>
-              <option value="default">Default</option>
-              <option value="public">Public</option>
-            </select>
-          </div>
         </div>
       </div>
 
       {sortedRecipes.length === 0 ? (
         <div className="empty-state">
-          <p className="mb-4">No public recipes available yet</p>
-          <p className="text-gray-500">Check back later for recipes shared by other users.</p>
+          <p className="mb-4">No default recipes available</p>
+          <p className="text-gray-500">Run the seed script to add default recipes.</p>
         </div>
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-3 gap-6">
           {sortedRecipes.map((recipe) => (
-            <PublicRecipeCard
+            <DefaultRecipeCard
               key={recipe.id}
               recipe={recipe}
-              onClick={() => navigate(`/recipes/${recipe.id}`)}
               onCopy={(e) => handleCopy(e, recipe)}
               isCopying={copyingId === recipe.id}
               isCopied={isAlreadyCopied(recipe.id)}
@@ -234,11 +183,10 @@ export default function RecipesToStartPage({ publicRecipes, copyRecipe, userReci
       ) : (
         <div className="card">
           {sortedRecipes.map((recipe, index) => (
-            <PublicRecipeListItem
+            <DefaultRecipeListItem
               key={recipe.id}
               recipe={recipe}
               isLast={index === sortedRecipes.length - 1}
-              onClick={() => navigate(`/recipes/${recipe.id}`)}
               onCopy={(e) => handleCopy(e, recipe)}
               isCopying={copyingId === recipe.id}
               isCopied={isAlreadyCopied(recipe.id)}

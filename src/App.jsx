@@ -5,6 +5,7 @@ import {
   collection,
   query,
   where,
+  or,
   getDocs,
   addDoc,
   updateDoc,
@@ -21,6 +22,7 @@ import RecipeFormPage from "./pages/RecipeFormPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
 import IngredientsPage from "./pages/IngredientsPage";
 import RecipesToStartPage from "./pages/RecipesToStartPage";
+import DefaultRecipesPage from "./pages/DefaultRecipesPage";
 
 function ProtectedRoute({ children }) {
   const { user, hasCompletedProfile } = useAuth();
@@ -37,7 +39,7 @@ function ProtectedRoute({ children }) {
 }
 
 function AppRoutes() {
-  const { user, hasCompletedProfile } = useAuth();
+  const { user, userProfile, hasCompletedProfile } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [publicRecipes, setPublicRecipes] = useState([]);
@@ -82,10 +84,13 @@ function AppRoutes() {
 
   const loadPublicData = async () => {
     try {
-      // Query default recipes (excluding current user's own recipes)
+      // Query recipes where isDefault=true OR isPublic=true (excluding current user's own recipes)
       const publicRecipesQuery = query(
         collection(db, "recipes"),
-        where("isDefault", "==", true)
+        or(
+          where("isDefault", "==", true),
+          where("isPublic", "==", true)
+        )
       );
       const publicRecipesSnapshot = await getDocs(publicRecipesQuery);
       const publicRecipesData = publicRecipesSnapshot.docs
@@ -93,13 +98,16 @@ function AppRoutes() {
           id: doc.id,
           ...doc.data(),
         }))
-        .filter((recipe) => recipe.userId !== user.uid);
+        .filter((recipe) => !recipe.userId || recipe.userId !== user.uid);
       setPublicRecipes(publicRecipesData);
 
-      // Query default ingredients (excluding current user's own ingredients)
+      // Query ingredients where isDefault=true OR isPublic=true (excluding current user's own ingredients)
       const publicIngredientsQuery = query(
         collection(db, "ingredients"),
-        where("isDefault", "==", true)
+        or(
+          where("isDefault", "==", true),
+          where("isPublic", "==", true)
+        )
       );
       const publicIngredientsSnapshot = await getDocs(publicIngredientsQuery);
       const publicIngredientsData = publicIngredientsSnapshot.docs
@@ -107,7 +115,7 @@ function AppRoutes() {
           id: doc.id,
           ...doc.data(),
         }))
-        .filter((ingredient) => ingredient.userId !== user.uid);
+        .filter((ingredient) => !ingredient.userId || ingredient.userId !== user.uid);
       setPublicIngredients(publicIngredientsData);
     } catch (error) {
       console.error("Error loading public data from Firestore:", error);
@@ -167,7 +175,13 @@ function AppRoutes() {
   };
 
   const addRecipe = async (recipe) => {
-    const recipeWithUser = { ...recipe, userId: user.uid, isDefault: false, isPublic: false };
+    const recipeWithUser = {
+      ...recipe,
+      userId: user.uid,
+      creator: userProfile?.userName || user.email,
+      isDefault: false,
+      isPublic: false,
+    };
     const docRef = await addDoc(collection(db, "recipes"), recipeWithUser);
     const newRecipe = { ...recipeWithUser, id: docRef.id };
     setRecipes([...recipes, newRecipe]);
@@ -261,7 +275,7 @@ function AppRoutes() {
           path="/recipes/:id"
           element={
             <ProtectedRoute>
-              <RecipeDetailPage recipes={recipes} />
+              <RecipeDetailPage recipes={recipes} publicRecipes={publicRecipes} />
             </ProtectedRoute>
           }
         />
@@ -297,6 +311,18 @@ function AppRoutes() {
             <ProtectedRoute>
               <RecipesToStartPage
                 publicRecipes={publicRecipes}
+                copyRecipe={copyRecipeToMyCollection}
+                userRecipes={recipes}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/default-recipes"
+          element={
+            <ProtectedRoute>
+              <DefaultRecipesPage
+                defaultRecipes={publicRecipes}
                 copyRecipe={copyRecipeToMyCollection}
                 userRecipes={recipes}
               />

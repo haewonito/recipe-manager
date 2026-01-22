@@ -11,6 +11,7 @@ import { collection, addDoc, getDocs } from "firebase/firestore";
  *   - firstName: string
  *   - lastName: string
  *   - email: string (from Firebase Auth)
+ *   - role: string ("admin" | "regularUser")
  *   - authProvider: string ("google.com" | "password")
  *   - createdAt: string (ISO timestamp)
  *

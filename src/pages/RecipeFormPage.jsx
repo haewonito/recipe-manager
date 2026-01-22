@@ -114,7 +114,6 @@ function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
-    creator: "",
     category: "Main",
     mainIngredients: [],
     necessaryIngredients: [],
@@ -129,7 +128,9 @@ function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await onSave(formData);
+    // Remove creator from formData if it exists (legacy)
+    const { creator, ...dataToSave } = formData;
+    await onSave(dataToSave);
     navigate("/recipes");
   };
 
@@ -160,16 +161,6 @@ function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
             required
             value={formData.title}
             onChange={(e) => updateField("title", e.target.value)}
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Creator *</label>
-          <input
-            type="text"
-            required
-            value={formData.creator}
-            onChange={(e) => updateField("creator", e.target.value)}
           />
         </div>
 
@@ -287,7 +278,6 @@ function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
-    creator: "",
     category: "Main",
     mainIngredients: [],
     necessaryIngredients: [],
@@ -318,16 +308,6 @@ function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
           required
           value={formData.title}
           onChange={(e) => updateField("title", e.target.value)}
-        />
-      </div>
-
-      <div className="form-group">
-        <label>Creator *</label>
-        <input
-          type="text"
-          required
-          value={formData.creator}
-          onChange={(e) => updateField("creator", e.target.value)}
         />
       </div>
 
@@ -444,7 +424,6 @@ function CombinationFormContent({ onSave, recipes }) {
   const navigate = useNavigate();
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [creator, setCreator] = useState("");
 
   // Filter out combination recipes and already selected recipes
   const availableRecipes = recipes.filter(
@@ -486,14 +465,9 @@ function CombinationFormContent({ onSave, recipes }) {
       alert("Please select at least 2 recipes to combine.");
       return;
     }
-    if (!creator.trim()) {
-      alert("Please enter a creator name.");
-      return;
-    }
 
     const combinationRecipe = {
       title: generatedTitle,
-      creator: creator.trim(),
       category: "Combination",
       mainIngredients: aggregateIngredients("mainIngredients"),
       necessaryIngredients: aggregateIngredients("necessaryIngredients"),
@@ -512,17 +486,6 @@ function CombinationFormContent({ onSave, recipes }) {
 
   return (
     <form onSubmit={handleSubmit} className="card card-padding">
-      <div className="form-group">
-        <label>Creator *</label>
-        <input
-          type="text"
-          required
-          value={creator}
-          onChange={(e) => setCreator(e.target.value)}
-          placeholder="Enter creator name"
-        />
-      </div>
-
       <div className="form-group">
         <label>Select Recipes to Combine *</label>
         <div className="input-with-icon mb-2">

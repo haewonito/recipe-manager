@@ -191,6 +191,8 @@ async function seedIngredients() {
       await addDoc(collection(db, "ingredients"), {
         name: ingredient.name,
         category: ingredient.category,
+        isDefault: true,
+        isPublic: false,
       });
       console.log(`Added: ${ingredient.name} (${ingredient.category})`);
       addedCount++;

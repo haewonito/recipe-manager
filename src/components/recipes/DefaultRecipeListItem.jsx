@@ -1,9 +1,9 @@
 import React from "react";
 import { ChefHat, Copy, Check, Loader2 } from "lucide-react";
 
-export default function PublicRecipeListItem({ recipe, isLast, onClick, onCopy, isCopying, isCopied }) {
+export default function DefaultRecipeListItem({ recipe, isLast, onCopy, isCopying, isCopied }) {
   return (
-    <div className={`recipe-list-item ${!isLast ? "border-b" : ""}`} onClick={onClick} style={{ cursor: "pointer" }}>
+    <div className={`recipe-list-item ${!isLast ? "border-b" : ""}`}>
       <div className="flex items-center gap-4 flex-1">
         <div className="recipe-list-image">
           {recipe.picture ? (
@@ -30,7 +30,7 @@ export default function PublicRecipeListItem({ recipe, isLast, onClick, onCopy, 
           onClick={onCopy}
           className={`btn-icon ${isCopied ? "text-green-600" : "text-blue-600"}`}
           disabled={isCopying || isCopied}
-          title={isCopied ? "Already in your collection" : "Copy to my recipes"}
+          title={isCopied ? "Already in your collection" : "Add to my recipes"}
         >
           {isCopying ? (
             <Loader2 className="icon-sm animate-spin" />

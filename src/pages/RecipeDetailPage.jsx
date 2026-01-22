@@ -2,10 +2,12 @@ import React from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Edit2, ChefHat } from "lucide-react";
 
-export default function RecipeDetailPage({ recipes }) {
+export default function RecipeDetailPage({ recipes, publicRecipes = [] }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const recipe = recipes.find((r) => r.id === id);
+  const allRecipes = [...recipes, ...publicRecipes];
+  const recipe = allRecipes.find((r) => r.id === id);
+  const isPublicRecipe = !recipes.find((r) => r.id === id);
 
   if (!recipe) {
     return (
@@ -19,7 +21,7 @@ export default function RecipeDetailPage({ recipes }) {
   // For combination recipes, look up the full sub-recipe objects
   const subRecipesFull = recipe.isCombination
     ? (recipe.subRecipes || [])
-        .map((sub) => recipes.find((r) => r.id === sub.id))
+        .map((sub) => allRecipes.find((r) => r.id === sub.id))
         .filter(Boolean)
     : [];
 
@@ -34,7 +36,7 @@ export default function RecipeDetailPage({ recipes }) {
           <ArrowLeft className="icon-md" />
           Back to Recipes
         </Link>
-        {!recipe.isCombination && (
+        {!recipe.isCombination && !isPublicRecipe && (
           <Link to={`/recipes/${recipe.id}/edit`} className="btn btn-blue">
             <Edit2 className="icon-sm" />
             Edit Recipe

@@ -1,9 +1,9 @@
 import React from "react";
 import { ChefHat, Copy, Check, Loader2 } from "lucide-react";
 
-export default function PublicRecipeCard({ recipe, onClick, onCopy, isCopying, isCopied }) {
+export default function DefaultRecipeCard({ recipe, onCopy, isCopying, isCopied }) {
   return (
-    <div className="recipe-card" onClick={onClick} style={{ cursor: "pointer" }}>
+    <div className="recipe-card">
       <div className="recipe-card-image">
         {recipe.picture ? (
           <img src={recipe.picture} alt={recipe.title} />
@@ -21,7 +21,7 @@ export default function PublicRecipeCard({ recipe, onClick, onCopy, isCopying, i
               onClick={onCopy}
               className={`btn-icon ${isCopied ? "text-green-600" : "text-blue-600"}`}
               disabled={isCopying || isCopied}
-              title={isCopied ? "Already in your collection" : "Copy to my recipes"}
+              title={isCopied ? "Already in your collection" : "Add to my recipes"}
             >
               {isCopying ? (
                 <Loader2 className="icon-sm animate-spin" />

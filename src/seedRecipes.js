@@ -232,6 +232,8 @@ async function seedRecipes() {
         longInstruction: recipe.longInstruction,
         longInstructionType: recipe.longInstructionType,
         picture: recipe.picture,
+        isDefault: true,
+        isPublic: false,
       };
 
       await addDoc(collection(db, "recipes"), recipeData);
