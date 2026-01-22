@@ -11,7 +11,8 @@
     "seed:users": "node src/seedUsers.js",
     "seed:ingredients": "node src/seedIngredients.js",
     "seed:recipes": "node src/seedRecipes.js",
-    "seed": "node src/seedIngredients.js && node src/seedRecipes.js"
+    "seed": "node src/seedIngredients.js && node src/seedRecipes.js",
+    "migrate:isdefault": "node scripts/migrate-ispublic-to-isdefault.js"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

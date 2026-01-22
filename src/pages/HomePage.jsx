@@ -54,6 +54,10 @@ export default function HomePage() {
           <h2>My Recipes</h2>
           <p>View, search, and manage your recipe collection</p>
         </Link>
+        <Link to="/recipes-to-start" className="menu-card green">
+          <h2>Recipes To Start</h2>
+          <p>Browse and copy recipes shared by other users</p>
+        </Link>
         <Link to="/recipes/new" className="menu-card amber">
           <h2>Create Recipe</h2>
           <p>Add a new recipe or combine existing recipes</p>

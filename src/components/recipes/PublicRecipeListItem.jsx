@@ -1,0 +1,46 @@
+import React from "react";
+import { ChefHat, Copy, Check, Loader2 } from "lucide-react";
+
+export default function PublicRecipeListItem({ recipe, isLast, onCopy, isCopying, isCopied }) {
+  return (
+    <div className={`recipe-list-item ${!isLast ? "border-b" : ""}`}>
+      <div className="flex items-center gap-4 flex-1">
+        <div className="recipe-list-image">
+          {recipe.picture ? (
+            <img src={recipe.picture} alt={recipe.title} />
+          ) : (
+            <ChefHat className="icon-xl text-orange-600" />
+          )}
+        </div>
+        <div className="recipe-list-info">
+          <h3 className="recipe-list-title">{recipe.title}</h3>
+          <p className="recipe-list-creator">by {recipe.creator}</p>
+          <div className="recipe-list-meta">
+            <span className="recipe-list-category">{recipe.category}</span>
+            {recipe.mainIngredients?.length > 0 && (
+              <span className="recipe-list-ingredients">
+                {recipe.mainIngredients.map((i) => i.name).join(", ")}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={onCopy}
+          className={`btn-icon ${isCopied ? "text-green-600" : "text-blue-600"}`}
+          disabled={isCopying || isCopied}
+          title={isCopied ? "Already in your collection" : "Copy to my recipes"}
+        >
+          {isCopying ? (
+            <Loader2 className="icon-sm animate-spin" />
+          ) : isCopied ? (
+            <Check className="icon-sm" />
+          ) : (
+            <Copy className="icon-sm" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}

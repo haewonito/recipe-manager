@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { db } from "./firebase";
 import {
   collection,
+  query,
+  where,
   getDocs,
   addDoc,
   updateDoc,
@@ -12,43 +14,62 @@ import {
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import LoginPage from "./pages/LoginPage";
+import CompleteProfilePage from "./pages/CompleteProfilePage";
 import HomePage from "./pages/HomePage";
 import RecipesPage from "./pages/RecipesPage";
 import RecipeFormPage from "./pages/RecipeFormPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
 import IngredientsPage from "./pages/IngredientsPage";
+import RecipesToStartPage from "./pages/RecipesToStartPage";
 
 function ProtectedRoute({ children }) {
-  const { user } = useAuth();
+  const { user, hasCompletedProfile } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!hasCompletedProfile) {
+    return <Navigate to="/complete-profile" replace />;
   }
 
   return children;
 }
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, hasCompletedProfile } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [ingredients, setIngredients] = useState([]);
+  const [publicRecipes, setPublicRecipes] = useState([]);
+  const [publicIngredients, setPublicIngredients] = useState([]);
 
   useEffect(() => {
     if (user) {
       loadData();
+      loadPublicData();
     }
   }, [user]);
 
   const loadData = async () => {
     try {
-      const recipesSnapshot = await getDocs(collection(db, "recipes"));
+      // Query only recipes belonging to the current user
+      const recipesQuery = query(
+        collection(db, "recipes"),
+        where("userId", "==", user.uid)
+      );
+      const recipesSnapshot = await getDocs(recipesQuery);
       const recipesData = recipesSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       setRecipes(recipesData);
 
-      const ingredientsSnapshot = await getDocs(collection(db, "ingredients"));
+      // Query only ingredients belonging to the current user
+      const ingredientsQuery = query(
+        collection(db, "ingredients"),
+        where("userId", "==", user.uid)
+      );
+      const ingredientsSnapshot = await getDocs(ingredientsQuery);
       const ingredientsData = ingredientsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -59,9 +80,96 @@ function AppRoutes() {
     }
   };
 
+  const loadPublicData = async () => {
+    try {
+      // Query default recipes (excluding current user's own recipes)
+      const publicRecipesQuery = query(
+        collection(db, "recipes"),
+        where("isDefault", "==", true)
+      );
+      const publicRecipesSnapshot = await getDocs(publicRecipesQuery);
+      const publicRecipesData = publicRecipesSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((recipe) => recipe.userId !== user.uid);
+      setPublicRecipes(publicRecipesData);
+
+      // Query default ingredients (excluding current user's own ingredients)
+      const publicIngredientsQuery = query(
+        collection(db, "ingredients"),
+        where("isDefault", "==", true)
+      );
+      const publicIngredientsSnapshot = await getDocs(publicIngredientsQuery);
+      const publicIngredientsData = publicIngredientsSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((ingredient) => ingredient.userId !== user.uid);
+      setPublicIngredients(publicIngredientsData);
+    } catch (error) {
+      console.error("Error loading public data from Firestore:", error);
+    }
+  };
+
+  const copyRecipeToMyCollection = async (publicRecipe) => {
+    // Copy ingredients that user doesn't have
+    const ingredientMapping = {};
+    const allIngredients = [
+      ...(publicRecipe.mainIngredients || []),
+      ...(publicRecipe.necessaryIngredients || []),
+      ...(publicRecipe.optionalIngredients || []),
+    ];
+
+    for (const ing of allIngredients) {
+      // Check if user already has this ingredient by name
+      const existingIngredient = ingredients.find(
+        (i) => i.name.toLowerCase() === ing.name.toLowerCase()
+      );
+
+      if (existingIngredient) {
+        ingredientMapping[ing.id] = existingIngredient;
+      } else {
+        // Find the ingredient in public ingredients to get its category
+        const publicIng = publicIngredients.find((pi) => pi.id === ing.id);
+        const category = publicIng?.category || "Pantry Staples";
+        const newIngredient = await addIngredient(ing.name, category);
+        ingredientMapping[ing.id] = newIngredient;
+      }
+    }
+
+    // Map ingredients to use user's ingredient IDs
+    const mapIngredients = (ingList) =>
+      (ingList || []).map((ing) => ({
+        id: ingredientMapping[ing.id]?.id || ing.id,
+        name: ing.name,
+      }));
+
+    const { id, userId, isDefault, isPublic, ...recipeData } = publicRecipe;
+    const newRecipe = {
+      ...recipeData,
+      mainIngredients: mapIngredients(publicRecipe.mainIngredients),
+      necessaryIngredients: mapIngredients(publicRecipe.necessaryIngredients),
+      optionalIngredients: mapIngredients(publicRecipe.optionalIngredients),
+      userId: user.uid,
+      isDefault: false,
+      isPublic: false,
+      sourceRecipeId: publicRecipe.id,
+      sourceUserId: publicRecipe.userId,
+    };
+
+    const docRef = await addDoc(collection(db, "recipes"), newRecipe);
+    const savedRecipe = { ...newRecipe, id: docRef.id };
+    setRecipes([...recipes, savedRecipe]);
+    return savedRecipe;
+  };
+
   const addRecipe = async (recipe) => {
-    const docRef = await addDoc(collection(db, "recipes"), recipe);
-    const newRecipe = { ...recipe, id: docRef.id };
+    const recipeWithUser = { ...recipe, userId: user.uid, isDefault: false, isPublic: false };
+    const docRef = await addDoc(collection(db, "recipes"), recipeWithUser);
+    const newRecipe = { ...recipeWithUser, id: docRef.id };
     setRecipes([...recipes, newRecipe]);
   };
 
@@ -80,8 +188,11 @@ function AppRoutes() {
     const docRef = await addDoc(collection(db, "ingredients"), {
       name,
       category,
+      userId: user.uid,
+      isDefault: false,
+      isPublic: false,
     });
-    const newIngredient = { id: docRef.id, name, category };
+    const newIngredient = { id: docRef.id, name, category, userId: user.uid, isDefault: false, isPublic: false };
     setIngredients((prevIngredients) => [...prevIngredients, newIngredient]);
     return newIngredient;
   };
@@ -104,6 +215,18 @@ function AppRoutes() {
         <Route
           path="/login"
           element={user ? <Navigate to="/" replace /> : <LoginPage />}
+        />
+        <Route
+          path="/complete-profile"
+          element={
+            !user ? (
+              <Navigate to="/login" replace />
+            ) : hasCompletedProfile ? (
+              <Navigate to="/" replace />
+            ) : (
+              <CompleteProfilePage />
+            )
+          }
         />
         <Route
           path="/"
@@ -164,6 +287,18 @@ function AppRoutes() {
                 addIngredient={addIngredient}
                 updateIngredient={updateIngredient}
                 deleteIngredient={deleteIngredient}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes-to-start"
+          element={
+            <ProtectedRoute>
+              <RecipesToStartPage
+                publicRecipes={publicRecipes}
+                copyRecipe={copyRecipeToMyCollection}
+                userRecipes={recipes}
               />
             </ProtectedRoute>
           }

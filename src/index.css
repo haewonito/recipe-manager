@@ -372,6 +372,15 @@ label {
   background: #fde047;
 }
 
+.menu-card.green {
+  background: #bbf7d0;
+  border-color: #86efac;
+}
+
+.menu-card.green:hover {
+  background: #86efac;
+}
+
 .menu-card h2 {
   font-size: 24px;
   font-weight: 700;

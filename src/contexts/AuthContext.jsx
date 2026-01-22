@@ -6,7 +6,8 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { auth, googleProvider } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, googleProvider, db } from "../firebase";
 
 const AuthContext = createContext();
 
@@ -16,16 +17,57 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      setUser(authUser);
+
+      if (authUser) {
+        // Check if user has a profile in Firestore
+        const profile = await fetchUserProfile(authUser.uid);
+        setUserProfile(profile);
+      } else {
+        setUserProfile(null);
+      }
+
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
+
+  const fetchUserProfile = async (uid) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        return { id: userDoc.id, ...userDoc.data() };
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      return null;
+    }
+  };
+
+  const createUserProfile = async (profileData) => {
+    if (!user) throw new Error("No authenticated user");
+
+    const userData = {
+      email: user.email,
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      userName: profileData.userName,
+      authProvider: user.providerData[0]?.providerId || "unknown",
+      createdAt: new Date().toISOString(),
+    };
+
+    await setDoc(doc(db, "users", user.uid), userData);
+    const newProfile = { id: user.uid, ...userData };
+    setUserProfile(newProfile);
+    return newProfile;
+  };
 
   const login = (email, password) => {
     return signInWithEmailAndPassword(auth, email, password);
@@ -45,10 +87,13 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
+    userProfile,
+    hasCompletedProfile: !!userProfile,
     login,
     signup,
     loginWithGoogle,
     logout,
+    createUserProfile,
   };
 
   return (
