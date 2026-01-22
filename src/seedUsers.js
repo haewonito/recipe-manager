@@ -23,8 +23,6 @@ const users = [
   // Sample users - remove or modify for production
   { userName: "admin", firstName: "Admin", lastName: "User", email: "admin@example.com", password: "admin123" },
   { userName: "user", firstName: "Regular", lastName: "User", email: "user@example.com", password: "user123" },
-  { userName: "haewonito", firstName: "Haewon", lastName: "Jeon", email: "haewonjeonibmacc@gmail.com", password: "admin123" },
-  { userName: "john", firstName: "John", lastName: "Morris", email: "haewonjeonibmacc+john@gmail.com", password: "user123" },
 ];
 
 async function seedUsers() {

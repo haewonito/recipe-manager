@@ -44,7 +44,14 @@ export default function CompleteProfilePage() {
 
     try {
       // Check if username is already taken
-      const userNameExists = await checkUserNameExists(userName);
+      let userNameExists = false;
+      try {
+        userNameExists = await checkUserNameExists(userName);
+      } catch (checkErr) {
+        console.error("Error checking username:", checkErr);
+        // Continue anyway - we'll catch duplicate on save if needed
+      }
+
       if (userNameExists) {
         setError("This username is already taken");
         setLoading(false);
@@ -60,7 +67,7 @@ export default function CompleteProfilePage() {
       navigate("/");
     } catch (err) {
       console.error("Error creating profile:", err);
-      setError("Failed to create profile. Please try again.");
+      setError(`Failed to create profile: ${err.message}`);
     }
 
     setLoading(false);
