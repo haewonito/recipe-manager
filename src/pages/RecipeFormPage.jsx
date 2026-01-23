@@ -123,6 +123,7 @@ function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
     longInstruction: "",
     longInstructionType: "text",
     picture: "",
+    isPublic: false,
     ...existingRecipe,
   });
 
@@ -260,6 +261,21 @@ function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
           />
         </div>
 
+        <div className="form-group">
+          <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={formData.isPublic || false}
+              onChange={(e) => updateField("isPublic", e.target.checked)}
+              style={{ width: "18px", height: "18px" }}
+            />
+            Make this recipe public
+          </label>
+          <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "4px" }}>
+            Public recipes can be viewed and copied by other users
+          </p>
+        </div>
+
         <div className="flex gap-4 pt-4">
           <button type="submit" className="flex-1 btn btn-primary">
             Update Recipe
@@ -287,6 +303,7 @@ function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
     longInstruction: "",
     longInstructionType: "text",
     picture: "",
+    isPublic: false,
   });
 
   const handleSubmit = async (e) => {
@@ -405,6 +422,21 @@ function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
           onChange={(e) => updateField("picture", e.target.value)}
           placeholder="https://..."
         />
+      </div>
+
+      <div className="form-group">
+        <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={formData.isPublic || false}
+            onChange={(e) => updateField("isPublic", e.target.checked)}
+            style={{ width: "18px", height: "18px" }}
+          />
+          Make this recipe public
+        </label>
+        <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "4px" }}>
+          Public recipes can be viewed and copied by other users
+        </p>
       </div>
 
       <div className="flex gap-4 pt-4">

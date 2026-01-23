@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Grid, List, ArrowLeft } from "lucide-react";
+import { Search, Grid, List, ArrowLeft, Plus } from "lucide-react";
 import { RECIPE_CATEGORIES } from "../constants";
 import RecipeCard from "../components/recipes/RecipeCard";
 import RecipeListItem from "../components/recipes/RecipeListItem";
@@ -65,7 +65,10 @@ export default function RecipesPage({ recipes, deleteRecipe }) {
           Back to Home
         </Link>
         <h1 style={{ margin: 0 }}>My Recipes</h1>
-        <div className="w-24"></div>
+        <Link to="/recipes/new" className="btn btn-primary flex items-center gap-2">
+          <Plus className="icon-md" />
+          Create Recipe
+        </Link>
       </div>
 
       <div className="card card-padding-small mb-6">

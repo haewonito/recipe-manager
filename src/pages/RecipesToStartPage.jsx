@@ -5,7 +5,11 @@ import { RECIPE_CATEGORIES } from "../constants";
 import PublicRecipeCard from "../components/recipes/PublicRecipeCard";
 import PublicRecipeListItem from "../components/recipes/PublicRecipeListItem";
 
-export default function RecipesToStartPage({ publicRecipes, copyRecipe, userRecipes }) {
+export default function RecipesToStartPage({
+  publicRecipes,
+  copyRecipe,
+  userRecipes,
+}) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
@@ -21,34 +25,37 @@ export default function RecipesToStartPage({ publicRecipes, copyRecipe, userReci
   const allMainIngredients = [
     ...new Set(
       publicRecipes.flatMap(
-        (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || []
-      )
+        (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || [],
+      ),
     ),
   ].sort();
 
   // Get unique creators from all public recipes
   const allCreators = [
-    ...new Set(
-      publicRecipes.map((recipe) => recipe.creator).filter(Boolean)
-    ),
+    ...new Set(publicRecipes.map((recipe) => recipe.creator).filter(Boolean)),
   ].sort();
 
   // Check if recipe is already copied (by sourceRecipeId)
   const isAlreadyCopied = (recipeId) => {
-    return userRecipes.some((r) => r.sourceRecipeId === recipeId) || copiedIds.has(recipeId);
+    return (
+      userRecipes.some((r) => r.sourceRecipeId === recipeId) ||
+      copiedIds.has(recipeId)
+    );
   };
 
   const filteredRecipes = publicRecipes
     .filter(
       (recipe) =>
         recipe.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.creator?.toLowerCase().includes(searchTerm.toLowerCase())
+        recipe.creator?.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     .filter((recipe) => !filterCategory || recipe.category === filterCategory)
     .filter(
       (recipe) =>
         !filterMainIngredient ||
-        recipe.mainIngredients?.some((ing) => ing.name === filterMainIngredient)
+        recipe.mainIngredients?.some(
+          (ing) => ing.name === filterMainIngredient,
+        ),
     )
     .filter((recipe) => !filterCreator || recipe.creator === filterCreator)
     .filter((recipe) => {
@@ -100,7 +107,8 @@ export default function RecipesToStartPage({ publicRecipes, copyRecipe, userReci
       </div>
 
       <p className="text-gray-600 mb-6 text-center">
-        Browse recipes shared by other users. Copy any recipe to add it to your collection and make it your own.
+        Browse recipes shared by other users. Copy any recipe to add it to your
+        collection and make it your own.
       </p>
 
       <div className="card card-padding-small mb-6">
@@ -195,28 +203,25 @@ export default function RecipesToStartPage({ publicRecipes, copyRecipe, userReci
               ))}
             </select>
           </div>
-
-          <div className="flex items-center gap-2">
-            <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
-              Filter by Type:
-            </span>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              style={{ minWidth: "120px" }}
-            >
-              <option value="">All</option>
-              <option value="default">Default</option>
-              <option value="public">Public</option>
-            </select>
-          </div>
+          <button
+            onClick={() =>
+              setFilterType(filterType === "default" ? "" : "default")
+            }
+            className={`btn ${filterType === "default" ? "btn-primary" : "btn-secondary"}`}
+          >
+            {filterType === "default"
+              ? "Showing Default Only"
+              : "Show Default Only"}
+          </button>
         </div>
       </div>
 
       {sortedRecipes.length === 0 ? (
         <div className="empty-state">
           <p className="mb-4">No public recipes available yet</p>
-          <p className="text-gray-500">Check back later for recipes shared by other users.</p>
+          <p className="text-gray-500">
+            Check back later for recipes shared by other users.
+          </p>
         </div>
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-3 gap-6">

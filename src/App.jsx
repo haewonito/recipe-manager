@@ -20,7 +20,7 @@ import HomePage from "./pages/HomePage";
 import RecipesPage from "./pages/RecipesPage";
 import RecipeFormPage from "./pages/RecipeFormPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
-import IngredientsPage from "./pages/IngredientsPage";
+import IngredientsPage from "./pages/IngredientsToStartPage";
 import RecipesToStartPage from "./pages/RecipesToStartPage";
 import DefaultRecipesPage from "./pages/DefaultRecipesPage";
 
@@ -57,7 +57,7 @@ function AppRoutes() {
       // Query only recipes belonging to the current user
       const recipesQuery = query(
         collection(db, "recipes"),
-        where("userId", "==", user.uid)
+        where("userId", "==", user.uid),
       );
       const recipesSnapshot = await getDocs(recipesQuery);
       const recipesData = recipesSnapshot.docs.map((doc) => ({
@@ -69,7 +69,7 @@ function AppRoutes() {
       // Query only ingredients belonging to the current user
       const ingredientsQuery = query(
         collection(db, "ingredients"),
-        where("userId", "==", user.uid)
+        where("userId", "==", user.uid),
       );
       const ingredientsSnapshot = await getDocs(ingredientsQuery);
       const ingredientsData = ingredientsSnapshot.docs.map((doc) => ({
@@ -87,10 +87,7 @@ function AppRoutes() {
       // Query recipes where isDefault=true OR isPublic=true (excluding current user's own recipes)
       const publicRecipesQuery = query(
         collection(db, "recipes"),
-        or(
-          where("isDefault", "==", true),
-          where("isPublic", "==", true)
-        )
+        or(where("isDefault", "==", true), where("isPublic", "==", true)),
       );
       const publicRecipesSnapshot = await getDocs(publicRecipesQuery);
       const publicRecipesData = publicRecipesSnapshot.docs
@@ -104,10 +101,7 @@ function AppRoutes() {
       // Query ingredients where isDefault=true OR isPublic=true (excluding current user's own ingredients)
       const publicIngredientsQuery = query(
         collection(db, "ingredients"),
-        or(
-          where("isDefault", "==", true),
-          where("isPublic", "==", true)
-        )
+        or(where("isDefault", "==", true), where("isPublic", "==", true)),
       );
       const publicIngredientsSnapshot = await getDocs(publicIngredientsQuery);
       const publicIngredientsData = publicIngredientsSnapshot.docs
@@ -115,7 +109,9 @@ function AppRoutes() {
           id: doc.id,
           ...doc.data(),
         }))
-        .filter((ingredient) => !ingredient.userId || ingredient.userId !== user.uid);
+        .filter(
+          (ingredient) => !ingredient.userId || ingredient.userId !== user.uid,
+        );
       setPublicIngredients(publicIngredientsData);
     } catch (error) {
       console.error("Error loading public data from Firestore:", error);
@@ -134,7 +130,7 @@ function AppRoutes() {
     for (const ing of allIngredients) {
       // Check if user already has this ingredient by name
       const existingIngredient = ingredients.find(
-        (i) => i.name.toLowerCase() === ing.name.toLowerCase()
+        (i) => i.name.toLowerCase() === ing.name.toLowerCase(),
       );
 
       if (existingIngredient) {
@@ -198,23 +194,32 @@ function AppRoutes() {
     setRecipes(recipes.filter((r) => r.id !== id));
   };
 
-  const addIngredient = async (name, category) => {
+  const addIngredient = async (name, category, isPublic = false) => {
     const docRef = await addDoc(collection(db, "ingredients"), {
       name,
       category,
       userId: user.uid,
       isDefault: false,
-      isPublic: false,
+      isPublic,
     });
-    const newIngredient = { id: docRef.id, name, category, userId: user.uid, isDefault: false, isPublic: false };
+    const newIngredient = {
+      id: docRef.id,
+      name,
+      category,
+      userId: user.uid,
+      isDefault: false,
+      isPublic,
+    };
     setIngredients((prevIngredients) => [...prevIngredients, newIngredient]);
     return newIngredient;
   };
 
-  const updateIngredient = async (id, name, category) => {
-    await updateDoc(doc(db, "ingredients", id), { name, category });
+  const updateIngredient = async (id, name, category, isPublic = false) => {
+    await updateDoc(doc(db, "ingredients", id), { name, category, isPublic });
     setIngredients(
-      ingredients.map((i) => (i.id === id ? { ...i, name, category } : i))
+      ingredients.map((i) =>
+        i.id === id ? { ...i, name, category, isPublic } : i,
+      ),
     );
   };
 
@@ -275,7 +280,10 @@ function AppRoutes() {
           path="/recipes/:id"
           element={
             <ProtectedRoute>
-              <RecipeDetailPage recipes={recipes} publicRecipes={publicRecipes} />
+              <RecipeDetailPage
+                recipes={recipes}
+                publicRecipes={publicRecipes}
+              />
             </ProtectedRoute>
           }
         />
@@ -311,6 +319,18 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <RecipesToStartPage
+                publicRecipes={publicRecipes}
+                copyRecipe={copyRecipeToMyCollection}
+                userRecipes={recipes}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ingredients-to-start"
+          element={
+            <ProtectedRoute>
+              <IngredientsToStartPage
                 publicRecipes={publicRecipes}
                 copyRecipe={copyRecipeToMyCollection}
                 userRecipes={recipes}

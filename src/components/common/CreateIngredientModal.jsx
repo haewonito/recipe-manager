@@ -4,10 +4,11 @@ import { INGREDIENT_CATEGORIES } from "../../constants";
 export default function CreateIngredientModal({ onClose, onCreate, initialValue }) {
   const [name, setName] = useState(initialValue);
   const [category, setCategory] = useState(INGREDIENT_CATEGORIES[0]);
+  const [isPublic, setIsPublic] = useState(false);
 
   const handleCreate = () => {
     if (name.trim()) {
-      onCreate(name.trim(), category);
+      onCreate(name.trim(), category, isPublic);
     }
   };
 
@@ -36,6 +37,15 @@ export default function CreateIngredientModal({ onClose, onCreate, initialValue 
               </option>
             ))}
           </select>
+          <label className="flex items-center gap-2 mb-4" style={{ cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              style={{ width: "16px", height: "16px" }}
+            />
+            <span style={{ color: "#374151" }}>Make this ingredient public</span>
+          </label>
           <div className="flex gap-4">
             <button
               type="button"

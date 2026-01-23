@@ -26,6 +26,7 @@ export default function IngredientsPage({
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [editingCategory, setEditingCategory] = useState("");
+  const [editingIsPublic, setEditingIsPublic] = useState(false);
   const [sortBy, setSortBy] = useState("name"); // "name" or "category"
   const [sortDirection, setSortDirection] = useState("asc"); // "asc" or "desc"
 
@@ -55,8 +56,8 @@ export default function IngredientsPage({
       return sortDirection === "asc" ? compare : -compare;
     });
 
-  const handleCreate = async (name, category) => {
-    await addIngredient(name, category);
+  const handleCreate = async (name, category, isPublic) => {
+    await addIngredient(name, category, isPublic);
     setShowCreateModal(false);
   };
 
@@ -64,14 +65,16 @@ export default function IngredientsPage({
     setEditingId(ing.id);
     setEditingName(ing.name);
     setEditingCategory(ing.category || INGREDIENT_CATEGORIES[0]);
+    setEditingIsPublic(ing.isPublic || false);
   };
 
   const handleSaveEdit = async () => {
     if (editingName.trim()) {
-      await updateIngredient(editingId, editingName.trim(), editingCategory);
+      await updateIngredient(editingId, editingName.trim(), editingCategory, editingIsPublic);
       setEditingId(null);
       setEditingName("");
       setEditingCategory("");
+      setEditingIsPublic(false);
     }
   };
 
@@ -212,7 +215,7 @@ export default function IngredientsPage({
             >
               {editingId === ing.id ? (
                 <div
-                  className="flex gap-2 flex-1"
+                  className="flex gap-2 flex-1 items-center"
                   style={{ marginRight: "16px" }}
                 >
                   <input
@@ -233,6 +236,15 @@ export default function IngredientsPage({
                       </option>
                     ))}
                   </select>
+                  <label className="flex items-center gap-1" style={{ cursor: "pointer", whiteSpace: "nowrap" }}>
+                    <input
+                      type="checkbox"
+                      checked={editingIsPublic}
+                      onChange={(e) => setEditingIsPublic(e.target.checked)}
+                      style={{ width: "16px", height: "16px" }}
+                    />
+                    <span style={{ fontSize: "14px" }}>Public</span>
+                  </label>
                 </div>
               ) : (
                 <div className="flex items-center gap-3">

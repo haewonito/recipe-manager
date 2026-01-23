@@ -339,8 +339,8 @@ label {
 }
 
 /* Menu Cards */
-.menu-card {
-  background: #dcfce7;
+.menu-card {background: #ecfdf5;
+  border-color: #a7f3d0;
   border: 2px solid #86efac;
   border-radius: 12px;
   padding: 32px;
@@ -354,8 +354,8 @@ label {
   transform: translateY(-2px);
 }
 
-.menu-card.amber {
-  background: #d1fae5;
+.menu-card.amber {background: #dcfce7;
+  
   border-color: #6ee7b7;
 }
 
@@ -364,7 +364,7 @@ label {
 }
 
 .menu-card.yellow {
-  background: #ecfdf5;
+  background: #d1fae5;
   border-color: #a7f3d0;
 }
 
