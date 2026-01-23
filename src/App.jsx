@@ -187,12 +187,14 @@ function AppRoutes() {
   const updateRecipe = async (updatedRecipe) => {
     const { id, ...recipeData } = updatedRecipe;
     await updateDoc(doc(db, "recipes", id), recipeData);
-    setRecipes(recipes.map((r) => (r.id === id ? updatedRecipe : r)));
+    setRecipes((prevRecipes) =>
+      prevRecipes.map((r) => (r.id === id ? updatedRecipe : r))
+    );
   };
 
   const deleteRecipe = async (id) => {
     await deleteDoc(doc(db, "recipes", id));
-    setRecipes(recipes.filter((r) => r.id !== id));
+    setRecipes((prevRecipes) => prevRecipes.filter((r) => r.id !== id));
   };
 
   const addIngredient = async (name, category, isPublic = false) => {
@@ -217,8 +219,8 @@ function AppRoutes() {
 
   const updateIngredient = async (id, name, category, isPublic = false) => {
     await updateDoc(doc(db, "ingredients", id), { name, category, isPublic });
-    setIngredients(
-      ingredients.map((i) =>
+    setIngredients((prevIngredients) =>
+      prevIngredients.map((i) =>
         i.id === id ? { ...i, name, category, isPublic } : i,
       ),
     );
@@ -226,7 +228,9 @@ function AppRoutes() {
 
   const deleteIngredient = async (id) => {
     await deleteDoc(doc(db, "ingredients", id));
-    setIngredients(ingredients.filter((i) => i.id !== id));
+    setIngredients((prevIngredients) =>
+      prevIngredients.filter((i) => i.id !== id)
+    );
   };
 
   const copyIngredientToMyCollection = async (publicIngredient) => {

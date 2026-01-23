@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Edit2, Trash2, ArrowLeft } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, ArrowLeft, Copy } from "lucide-react";
 import { INGREDIENT_CATEGORIES, CATEGORY_COLORS } from "../constants";
 import CreateIngredientModal from "../components/common/CreateIngredientModal";
 
@@ -16,10 +16,16 @@ export default function IngredientsPage({
   const [showDefaultIngredients, setShowDefaultIngredients] = useState(true);
 
   // Combine user ingredients with default ingredients (marked as isDefault)
+  // Filter out default ingredients that user has already copied (by name)
+  const userIngredientNames = new Set(
+    ingredients.map((ing) => ing.name.toLowerCase())
+  );
   const allIngredients = [
     ...ingredients.map((ing) => ({ ...ing, isDefaultIngredient: false })),
     ...(showDefaultIngredients
-      ? defaultIngredients.map((ing) => ({ ...ing, isDefaultIngredient: true }))
+      ? defaultIngredients
+          .filter((ing) => !userIngredientNames.has(ing.name.toLowerCase()))
+          .map((ing) => ({ ...ing, isDefaultIngredient: true }))
       : []),
   ];
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -29,6 +35,26 @@ export default function IngredientsPage({
   const [editingIsPublic, setEditingIsPublic] = useState(false);
   const [sortBy, setSortBy] = useState("name"); // "name" or "category"
   const [sortDirection, setSortDirection] = useState("asc"); // "asc" or "desc"
+  const [copyingId, setCopyingId] = useState(null);
+
+  // Check if a default ingredient is already in user's collection
+  const isAlreadyCopied = (defaultIng) => {
+    return ingredients.some(
+      (i) => i.name.toLowerCase() === defaultIng.name.toLowerCase()
+    );
+  };
+
+  const handleCopyDefault = async (ing) => {
+    if (isAlreadyCopied(ing)) return;
+    setCopyingId(ing.id);
+    try {
+      await addIngredient(ing.name, ing.category, false);
+    } catch (error) {
+      console.error("Failed to copy ingredient:", error);
+    } finally {
+      setCopyingId(null);
+    }
+  };
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -223,7 +249,7 @@ export default function IngredientsPage({
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                    className="flex-1"
+                    style={{ flex: 1, minWidth: "150px" }}
                     autoFocus
                   />
                   <select
@@ -286,9 +312,22 @@ export default function IngredientsPage({
                     </button>
                   </>
                 ) : ing.isDefaultIngredient ? (
-                  <span style={{ color: "#9ca3af", fontSize: "12px", padding: "8px" }}>
-                    Read-only
-                  </span>
+                  isAlreadyCopied(ing) ? (
+                    <span style={{ color: "#9ca3af", fontSize: "12px", padding: "8px" }}>
+                      Already copied
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleCopyDefault(ing)}
+                      disabled={copyingId === ing.id}
+                      className="btn btn-secondary flex items-center gap-1"
+                      style={{ padding: "4px 12px", fontSize: "14px" }}
+                      title="Copy to my ingredients for editing"
+                    >
+                      <Copy className="icon-sm" />
+                      {copyingId === ing.id ? "Copying..." : "Copy"}
+                    </button>
+                  )
                 ) : (
                   <>
                     <button
