@@ -14,6 +14,8 @@ export default function IngredientsToStartPage({
   const [filterType, setFilterType] = useState("");
   const [copyingId, setCopyingId] = useState(null);
   const [copiedIds, setCopiedIds] = useState(new Set());
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [isCopyingMultiple, setIsCopyingMultiple] = useState(false);
 
   // Check if ingredient is already in user's collection (by name, case-insensitive)
   const isAlreadyCopied = (ingredient) => {
@@ -43,6 +45,11 @@ export default function IngredientsToStartPage({
     return a.name.localeCompare(b.name);
   });
 
+  // Get selectable ingredients (not already copied)
+  const selectableIngredients = sortedIngredients.filter(
+    (ing) => !isAlreadyCopied(ing)
+  );
+
   const handleCopy = async (e, ingredient) => {
     e.stopPropagation();
     if (isAlreadyCopied(ingredient) || copyingId === ingredient.id) return;
@@ -51,12 +58,63 @@ export default function IngredientsToStartPage({
     try {
       await copyIngredient(ingredient);
       setCopiedIds((prev) => new Set([...prev, ingredient.id]));
+      setSelectedIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(ingredient.id);
+        return newSet;
+      });
     } catch (error) {
       console.error("Failed to copy ingredient:", error);
     } finally {
       setCopyingId(null);
     }
   };
+
+  const toggleSelect = (ingredientId, ingredient) => {
+    if (isAlreadyCopied(ingredient)) return;
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(ingredientId)) {
+        newSet.delete(ingredientId);
+      } else {
+        newSet.add(ingredientId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === selectableIngredients.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(selectableIngredients.map((ing) => ing.id)));
+    }
+  };
+
+  const handleCopySelected = async () => {
+    if (selectedIds.size === 0 || isCopyingMultiple) return;
+
+    setIsCopyingMultiple(true);
+    const ingredientsToCopy = sortedIngredients.filter((ing) =>
+      selectedIds.has(ing.id)
+    );
+
+    for (const ingredient of ingredientsToCopy) {
+      try {
+        await copyIngredient(ingredient);
+        setCopiedIds((prev) => new Set([...prev, ingredient.id]));
+      } catch (error) {
+        console.error("Failed to copy ingredient:", ingredient.name, error);
+      }
+    }
+
+    setSelectedIds(new Set());
+    setIsCopyingMultiple(false);
+  };
+
+  const isAllSelected =
+    selectableIngredients.length > 0 &&
+    selectedIds.size === selectableIngredients.length;
 
   return (
     <div className="container">
@@ -147,12 +205,37 @@ export default function IngredientsToStartPage({
             style={{ backgroundColor: "#f9fafb" }}
           >
             <div className="flex items-center gap-3">
+              <label
+                className="flex items-center gap-2"
+                style={{ cursor: "pointer", minWidth: "30px" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={handleSelectAll}
+                  style={{ width: "18px", height: "18px" }}
+                />
+              </label>
               <span style={{ minWidth: "200px", fontWeight: 600 }}>
                 Ingredient
               </span>
               <span style={{ fontWeight: 600 }}>Category</span>
             </div>
-            <div style={{ width: "100px" }}></div>
+            <div style={{ minWidth: "150px" }} className="flex justify-end">
+              {selectedIds.size > 0 && (
+                <button
+                  onClick={handleCopySelected}
+                  disabled={isCopyingMultiple}
+                  className="btn btn-primary flex items-center gap-1"
+                  style={{ padding: "6px 12px", fontSize: "14px" }}
+                >
+                  <Copy className="icon-sm" />
+                  {isCopyingMultiple
+                    ? "Copying..."
+                    : `Copy Selected (${selectedIds.size})`}
+                </button>
+              )}
+            </div>
           </div>
 
           {sortedIngredients.map((ing, index) => (
@@ -161,8 +244,26 @@ export default function IngredientsToStartPage({
               className={`p-4 flex items-center justify-between ${
                 index !== sortedIngredients.length - 1 ? "border-b" : ""
               }`}
+              style={{
+                backgroundColor: selectedIds.has(ing.id)
+                  ? "#fff7ed"
+                  : "transparent",
+              }}
             >
               <div className="flex items-center gap-3">
+                <div style={{ minWidth: "30px" }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(ing.id)}
+                    onChange={() => toggleSelect(ing.id, ing)}
+                    disabled={isAlreadyCopied(ing)}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      cursor: isAlreadyCopied(ing) ? "not-allowed" : "pointer",
+                    }}
+                  />
+                </div>
                 <span className="text-gray-800" style={{ minWidth: "200px" }}>
                   {ing.name}
                 </span>
@@ -181,7 +282,7 @@ export default function IngredientsToStartPage({
                   </span>
                 )}
               </div>
-              <div>
+              <div style={{ minWidth: "150px" }} className="flex justify-end">
                 {isAlreadyCopied(ing) ? (
                   <span className="flex items-center gap-1 text-green-600">
                     <Check className="icon-sm" />
