@@ -20,8 +20,9 @@ import HomePage from "./pages/HomePage";
 import RecipesPage from "./pages/RecipesPage";
 import RecipeFormPage from "./pages/RecipeFormPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
-import IngredientsPage from "./pages/IngredientsToStartPage";
+import IngredientsPage from "./pages/IngredientsPage";
 import RecipesToStartPage from "./pages/RecipesToStartPage";
+import IngredientsToStartPage from "./pages/IngredientsToStartPage";
 import DefaultRecipesPage from "./pages/DefaultRecipesPage";
 
 function ProtectedRoute({ children }) {
@@ -228,6 +229,24 @@ function AppRoutes() {
     setIngredients(ingredients.filter((i) => i.id !== id));
   };
 
+  const copyIngredientToMyCollection = async (publicIngredient) => {
+    // Check if user already has this ingredient by name
+    const existingIngredient = ingredients.find(
+      (i) => i.name.toLowerCase() === publicIngredient.name.toLowerCase()
+    );
+
+    if (existingIngredient) {
+      return existingIngredient; // Already have it
+    }
+
+    const newIngredient = await addIngredient(
+      publicIngredient.name,
+      publicIngredient.category,
+      false // copied ingredients are not public by default
+    );
+    return newIngredient;
+  };
+
   return (
     <div className="min-h-screen">
       <Routes>
@@ -331,9 +350,9 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <IngredientsToStartPage
-                publicRecipes={publicRecipes}
-                copyRecipe={copyRecipeToMyCollection}
-                userRecipes={recipes}
+                publicIngredients={publicIngredients}
+                copyIngredient={copyIngredientToMyCollection}
+                userIngredients={ingredients}
               />
             </ProtectedRoute>
           }
