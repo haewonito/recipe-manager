@@ -47,7 +47,7 @@ export default function IngredientsToStartPage({
 
   // Get selectable ingredients (not already copied)
   const selectableIngredients = sortedIngredients.filter(
-    (ing) => !isAlreadyCopied(ing)
+    (ing) => !isAlreadyCopied(ing),
   );
 
   const handleCopy = async (e, ingredient) => {
@@ -96,7 +96,7 @@ export default function IngredientsToStartPage({
 
     setIsCopyingMultiple(true);
     const ingredientsToCopy = sortedIngredients.filter((ing) =>
-      selectedIds.has(ing.id)
+      selectedIds.has(ing.id),
     );
 
     for (const ingredient of ingredientsToCopy) {
@@ -199,7 +199,7 @@ export default function IngredientsToStartPage({
         </div>
       ) : (
         <div className="card">
-          {/* Header Row */}
+          {}
           <div
             className="p-4 flex items-center justify-between border-b"
             style={{ backgroundColor: "#f9fafb" }}

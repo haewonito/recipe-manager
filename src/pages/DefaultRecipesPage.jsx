@@ -5,7 +5,11 @@ import { RECIPE_CATEGORIES } from "../constants";
 import DefaultRecipeCard from "../components/recipes/DefaultRecipeCard";
 import DefaultRecipeListItem from "../components/recipes/DefaultRecipeListItem";
 
-export default function DefaultRecipesPage({ defaultRecipes, copyRecipe, userRecipes }) {
+export default function DefaultRecipesPage({
+  defaultRecipes,
+  copyRecipe,
+  userRecipes,
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
   const [viewMode, setViewMode] = useState("grid");
@@ -14,31 +18,34 @@ export default function DefaultRecipesPage({ defaultRecipes, copyRecipe, userRec
   const [copyingId, setCopyingId] = useState(null);
   const [copiedIds, setCopiedIds] = useState(new Set());
 
-  // Get unique main ingredients from all default recipes
   const allMainIngredients = [
     ...new Set(
       defaultRecipes.flatMap(
-        (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || []
-      )
+        (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || [],
+      ),
     ),
   ].sort();
 
-  // Check if recipe is already copied (by sourceRecipeId)
   const isAlreadyCopied = (recipeId) => {
-    return userRecipes.some((r) => r.sourceRecipeId === recipeId) || copiedIds.has(recipeId);
+    return (
+      userRecipes.some((r) => r.sourceRecipeId === recipeId) ||
+      copiedIds.has(recipeId)
+    );
   };
 
   const filteredRecipes = defaultRecipes
     .filter(
       (recipe) =>
         recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.creator?.toLowerCase().includes(searchTerm.toLowerCase())
+        recipe.creator?.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     .filter((recipe) => !filterCategory || recipe.category === filterCategory)
     .filter(
       (recipe) =>
         !filterMainIngredient ||
-        recipe.mainIngredients?.some((ing) => ing.name === filterMainIngredient)
+        recipe.mainIngredients?.some(
+          (ing) => ing.name === filterMainIngredient,
+        ),
     );
 
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
@@ -166,7 +173,9 @@ export default function DefaultRecipesPage({ defaultRecipes, copyRecipe, userRec
       {sortedRecipes.length === 0 ? (
         <div className="empty-state">
           <p className="mb-4">No default recipes available</p>
-          <p className="text-gray-500">Run the seed script to add default recipes.</p>
+          <p className="text-gray-500">
+            Run the seed script to add default recipes.
+          </p>
         </div>
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-3 gap-6">

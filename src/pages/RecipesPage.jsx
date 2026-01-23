@@ -13,12 +13,11 @@ export default function RecipesPage({ recipes, deleteRecipe }) {
   const [filterCategory, setFilterCategory] = useState("");
   const [filterMainIngredient, setFilterMainIngredient] = useState("");
 
-  // Get unique main ingredients from all recipes
   const allMainIngredients = [
     ...new Set(
       recipes.flatMap(
-        (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || []
-      )
+        (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || [],
+      ),
     ),
   ].sort();
 
@@ -26,13 +25,15 @@ export default function RecipesPage({ recipes, deleteRecipe }) {
     .filter(
       (recipe) =>
         recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.creator.toLowerCase().includes(searchTerm.toLowerCase())
+        recipe.creator.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     .filter((recipe) => !filterCategory || recipe.category === filterCategory)
     .filter(
       (recipe) =>
         !filterMainIngredient ||
-        recipe.mainIngredients?.some((ing) => ing.name === filterMainIngredient)
+        recipe.mainIngredients?.some(
+          (ing) => ing.name === filterMainIngredient,
+        ),
     );
 
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
@@ -65,7 +66,10 @@ export default function RecipesPage({ recipes, deleteRecipe }) {
           Back to Home
         </Link>
         <h1 style={{ margin: 0 }}>My Recipes</h1>
-        <Link to="/recipes/new" className="btn btn-primary flex items-center gap-2">
+        <Link
+          to="/recipes/new"
+          className="btn btn-primary flex items-center gap-2"
+        >
           <Plus className="icon-md" />
           Create Recipe
         </Link>

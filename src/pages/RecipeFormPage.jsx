@@ -262,7 +262,10 @@ function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
         </div>
 
         <div className="form-group">
-          <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+          <label
+            className="flex items-center gap-2"
+            style={{ cursor: "pointer" }}
+          >
             <input
               type="checkbox"
               checked={formData.isPublic || false}
@@ -425,7 +428,10 @@ function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
       </div>
 
       <div className="form-group">
-        <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+        <label
+          className="flex items-center gap-2"
+          style={{ cursor: "pointer" }}
+        >
           <input
             type="checkbox"
             checked={formData.isPublic || false}
@@ -451,27 +457,23 @@ function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
   );
 }
 
-// Combination recipe form content (for the "Combine Existing Recipes" tab)
 function CombinationFormContent({ onSave, recipes }) {
   const navigate = useNavigate();
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Filter out combination recipes and already selected recipes
   const availableRecipes = recipes.filter(
     (recipe) =>
       recipe.category !== "Combination" &&
       recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !selectedRecipes.find((r) => r.id === recipe.id)
+      !selectedRecipes.find((r) => r.id === recipe.id),
   );
 
-  // Auto-generate title from selected recipes
   const generatedTitle = selectedRecipes.map((r) => r.title).join(" & ");
 
-  // Aggregate ingredients from selected recipes (remove duplicates by id)
   const aggregateIngredients = (field) => {
     const allIngredients = selectedRecipes.flatMap(
-      (recipe) => recipe[field] || []
+      (recipe) => recipe[field] || [],
     );
     const uniqueMap = new Map();
     allIngredients.forEach((ing) => {

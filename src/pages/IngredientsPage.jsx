@@ -18,7 +18,7 @@ export default function IngredientsPage({
   // Combine user ingredients with default ingredients (marked as isDefault)
   // Filter out default ingredients that user has already copied (by name)
   const userIngredientNames = new Set(
-    ingredients.map((ing) => ing.name.toLowerCase())
+    ingredients.map((ing) => ing.name.toLowerCase()),
   );
   const allIngredients = [
     ...ingredients.map((ing) => ({ ...ing, isDefaultIngredient: false })),
@@ -33,14 +33,14 @@ export default function IngredientsPage({
   const [editingName, setEditingName] = useState("");
   const [editingCategory, setEditingCategory] = useState("");
   const [editingIsPublic, setEditingIsPublic] = useState(false);
-  const [sortBy, setSortBy] = useState("name"); // "name" or "category"
-  const [sortDirection, setSortDirection] = useState("asc"); // "asc" or "desc"
+  const [sortBy, setSortBy] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
   const [copyingId, setCopyingId] = useState(null);
 
   // Check if a default ingredient is already in user's collection
   const isAlreadyCopied = (defaultIng) => {
     return ingredients.some(
-      (i) => i.name.toLowerCase() === defaultIng.name.toLowerCase()
+      (i) => i.name.toLowerCase() === defaultIng.name.toLowerCase(),
     );
   };
 
@@ -96,7 +96,12 @@ export default function IngredientsPage({
 
   const handleSaveEdit = async () => {
     if (editingName.trim()) {
-      await updateIngredient(editingId, editingName.trim(), editingCategory, editingIsPublic);
+      await updateIngredient(
+        editingId,
+        editingName.trim(),
+        editingCategory,
+        editingIsPublic,
+      );
       setEditingId(null);
       setEditingName("");
       setEditingCategory("");
@@ -163,7 +168,10 @@ export default function IngredientsPage({
             </select>
           </div>
 
-          <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+          <label
+            className="flex items-center gap-2"
+            style={{ cursor: "pointer" }}
+          >
             <input
               type="checkbox"
               checked={showDefaultIngredients}
@@ -262,7 +270,10 @@ export default function IngredientsPage({
                       </option>
                     ))}
                   </select>
-                  <label className="flex items-center gap-1" style={{ cursor: "pointer", whiteSpace: "nowrap" }}>
+                  <label
+                    className="flex items-center gap-1"
+                    style={{ cursor: "pointer", whiteSpace: "nowrap" }}
+                  >
                     <input
                       type="checkbox"
                       checked={editingIsPublic}
@@ -313,7 +324,13 @@ export default function IngredientsPage({
                   </>
                 ) : ing.isDefaultIngredient ? (
                   isAlreadyCopied(ing) ? (
-                    <span style={{ color: "#9ca3af", fontSize: "12px", padding: "8px" }}>
+                    <span
+                      style={{
+                        color: "#9ca3af",
+                        fontSize: "12px",
+                        padding: "8px",
+                      }}
+                    >
                       Already copied
                     </span>
                   ) : (

@@ -18,7 +18,7 @@ export default function CompleteProfilePage() {
   const checkUserNameExists = async (userName) => {
     const usersQuery = query(
       collection(db, "users"),
-      where("userName", "==", userName.toLowerCase())
+      where("userName", "==", userName.toLowerCase()),
     );
     const snapshot = await getDocs(usersQuery);
     return !snapshot.empty;
@@ -37,19 +37,19 @@ export default function CompleteProfilePage() {
     }
 
     if (!/^[a-zA-Z0-9_]+$/.test(userName)) {
-      return setError("Username can only contain letters, numbers, and underscores");
+      return setError(
+        "Username can only contain letters, numbers, and underscores",
+      );
     }
 
     setLoading(true);
 
     try {
-      // Check if username is already taken
       let userNameExists = false;
       try {
         userNameExists = await checkUserNameExists(userName);
       } catch (checkErr) {
         console.error("Error checking username:", checkErr);
-        // Continue anyway - we'll catch duplicate on save if needed
       }
 
       if (userNameExists) {
@@ -74,8 +74,14 @@ export default function CompleteProfilePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#fff7ed" }}>
-      <div className="card card-padding" style={{ width: "100%", maxWidth: "400px" }}>
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ backgroundColor: "#fff7ed" }}
+    >
+      <div
+        className="card card-padding"
+        style={{ width: "100%", maxWidth: "400px" }}
+      >
         <div className="text-center mb-8">
           <ChefHat
             className="icon-3xl text-orange-600"
