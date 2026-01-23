@@ -69,7 +69,7 @@ export default function IngredientsToStartPage({
           <ArrowLeft className="icon-md" />
           Back to Home
         </Link>
-        <h1 style={{ margin: 0 }}>Ingredients To Start</h1>
+        <h1 style={{ margin: 0 }}>Public Ingredients</h1>
         <div className="w-24"></div>
       </div>
 

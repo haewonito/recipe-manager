@@ -59,14 +59,14 @@ export default function HomePage() {
           <p>View and manage your ingredient list</p>
         </Link>
         <Link to="/recipes-to-start" className="menu-card green">
-          <h2>Recipes To Start</h2>
+          <h2>Public Recipes</h2>
           <p>
             Browse and copy recipes shared by other users. Import a set of
             default recipes.
           </p>
         </Link>
         <Link to="/ingredients-to-start" className="menu-card green">
-          <h2>Ingredients To Start</h2>
+          <h2>Public Ingredients</h2>
           <p>
             Browse and copy ingredients shared by other users. Import a set of
             default ingredients.

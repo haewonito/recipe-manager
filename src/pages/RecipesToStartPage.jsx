@@ -102,7 +102,7 @@ export default function RecipesToStartPage({
           <ArrowLeft className="icon-md" />
           Back to Home
         </Link>
-        <h1 style={{ margin: 0 }}>Recipes To Start</h1>
+        <h1 style={{ margin: 0 }}>Public Recipes</h1>
         <div className="w-24"></div>
       </div>
 
