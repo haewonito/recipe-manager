@@ -134,7 +134,7 @@ export default function IngredientsToStartPage({
 
       {sortedIngredients.length === 0 ? (
         <div className="empty-state">
-          <p className="mb-4">No public ingredients available yet</p>
+          <p className="mb-4">No public ingredients yet</p>
           <p className="text-gray-500">
             Check back later for ingredients shared by other users.
           </p>
