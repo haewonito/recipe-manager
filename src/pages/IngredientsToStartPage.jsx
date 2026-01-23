@@ -19,15 +19,13 @@ export default function IngredientsToStartPage({
   const isAlreadyCopied = (ingredient) => {
     return (
       userIngredients.some(
-        (i) => i.name.toLowerCase() === ingredient.name.toLowerCase()
+        (i) => i.name.toLowerCase() === ingredient.name.toLowerCase(),
       ) || copiedIds.has(ingredient.id)
     );
   };
 
   const filteredIngredients = publicIngredients
-    .filter((ing) =>
-      ing.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    .filter((ing) => ing.name?.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter((ing) => !filterCategory || ing.category === filterCategory)
     .filter((ing) => {
       if (!filterType) return true;
@@ -128,8 +126,8 @@ export default function IngredientsToStartPage({
             className={`btn ${filterType === "default" ? "btn-primary" : "btn-secondary"}`}
           >
             {filterType === "default"
-              ? "Showing Default Only"
-              : "Show Default Only"}
+              ? "Showing Defaults Only"
+              : "Show Defaults Only"}
           </button>
         </div>
       </div>
