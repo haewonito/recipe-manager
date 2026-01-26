@@ -20,30 +20,15 @@ export default function RecipeListItem({ recipe, isLast, onClick, onEdit, onDele
           <p className="recipe-list-creator">by {recipe.creator}</p>
           <div className="recipe-list-meta">
             <span className="recipe-list-category">{recipe.category}</span>
+            {recipe.tags && recipe.tags.map((tag, idx) => (
+              <span key={idx} className="recipe-list-tag">{tag}</span>
+            ))}
             {recipe.mainIngredients.length > 0 && (
               <span className="recipe-list-ingredients">
                 {recipe.mainIngredients.map((i) => i.name).join(", ")}
               </span>
             )}
           </div>
-          {recipe.tags && recipe.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {recipe.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  style={{
-                    fontSize: "10px",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    backgroundColor: "#dbeafe",
-                    color: "#1e40af",
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
       <div className="flex gap-2">

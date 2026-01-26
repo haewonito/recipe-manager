@@ -47,10 +47,10 @@ export default function TagInput({ tags = [], onChange, placeholder = "Add tag..
             display: "inline-flex",
             alignItems: "center",
             gap: "4px",
-            padding: "4px 8px",
+            padding: "6px 12px",
             backgroundColor: "#dbeafe",
             color: "#1e40af",
-            borderRadius: "4px",
+            borderRadius: "9999px",
             fontSize: "13px",
           }}
         >

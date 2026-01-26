@@ -307,14 +307,14 @@ export default function IngredientsToStartPage({
                   </span>
                 )}
                 {ing.tags && ing.tags.length > 0 && (
-                  <div className="flex gap-1 flex-wrap" style={{ marginLeft: "8px" }}>
+                  <div className="flex gap-2 flex-wrap" style={{ marginLeft: "8px" }}>
                     {ing.tags.map((tag, idx) => (
                       <span
                         key={idx}
                         style={{
-                          fontSize: "11px",
-                          padding: "2px 6px",
-                          borderRadius: "4px",
+                          fontSize: "12px",
+                          padding: "4px 12px",
+                          borderRadius: "9999px",
                           backgroundColor: "#dbeafe",
                           color: "#1e40af",
                         }}

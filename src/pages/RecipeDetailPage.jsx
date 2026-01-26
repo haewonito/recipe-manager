@@ -59,25 +59,12 @@ export default function RecipeDetailPage({ recipes, publicRecipes = [] }) {
           <div className="mb-6">
             <h1 className="mb-2">{recipe.title}</h1>
             <p className="text-gray-600">Created by {recipe.creator}</p>
-            <span className="badge badge-orange mt-2">{recipe.category}</span>
-            {recipe.tags && recipe.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-4">
-                {recipe.tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      fontSize: "12px",
-                      padding: "4px 8px",
-                      borderRadius: "4px",
-                      backgroundColor: "#dbeafe",
-                      color: "#1e40af",
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            <div className="flex flex-wrap gap-2 items-center mt-2">
+              <span className="badge badge-orange">{recipe.category}</span>
+              {recipe.tags && recipe.tags.map((tag, idx) => (
+                <span key={idx} className="badge badge-blue">{tag}</span>
+              ))}
+            </div>
           </div>
 
           {recipe.mainIngredients?.length > 0 && (

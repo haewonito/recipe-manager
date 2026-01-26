@@ -314,6 +314,11 @@ label {
   color: #854d0e;
 }
 
+.badge-blue {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
 .tag {
   display: inline-flex;
   align-items: center;
@@ -506,10 +511,18 @@ label {
 
 .recipe-list-category {
   font-size: 12px;
-  padding: 4px 8px;
+  padding: 4px 12px;
   background: #fed7aa;
   color: #9a3412;
-  border-radius: 4px;
+  border-radius: 9999px;
+}
+
+.recipe-list-tag {
+  font-size: 12px;
+  padding: 4px 12px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 9999px;
 }
 
 .recipe-list-ingredients {
