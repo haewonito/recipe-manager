@@ -137,10 +137,11 @@ function AppRoutes() {
       if (existingIngredient) {
         ingredientMapping[ing.id] = existingIngredient;
       } else {
-        // Find the ingredient in public ingredients to get its category
+        // Find the ingredient in public ingredients to get its category and tags
         const publicIng = publicIngredients.find((pi) => pi.id === ing.id);
         const category = publicIng?.category || "Pantry Staples";
-        const newIngredient = await addIngredient(ing.name, category);
+        const tags = publicIng?.tags || [];
+        const newIngredient = await addIngredient(ing.name, category, false, tags);
         ingredientMapping[ing.id] = newIngredient;
       }
     }
@@ -197,10 +198,11 @@ function AppRoutes() {
     setRecipes((prevRecipes) => prevRecipes.filter((r) => r.id !== id));
   };
 
-  const addIngredient = async (name, category, isPublic = false) => {
+  const addIngredient = async (name, category, isPublic = false, tags = []) => {
     const docRef = await addDoc(collection(db, "ingredients"), {
       name,
       category,
+      tags,
       userId: user.uid,
       isDefault: false,
       isPublic,
@@ -209,6 +211,7 @@ function AppRoutes() {
       id: docRef.id,
       name,
       category,
+      tags,
       userId: user.uid,
       isDefault: false,
       isPublic,
@@ -217,11 +220,11 @@ function AppRoutes() {
     return newIngredient;
   };
 
-  const updateIngredient = async (id, name, category, isPublic = false) => {
-    await updateDoc(doc(db, "ingredients", id), { name, category, isPublic });
+  const updateIngredient = async (id, name, category, isPublic = false, tags = []) => {
+    await updateDoc(doc(db, "ingredients", id), { name, category, isPublic, tags });
     setIngredients((prevIngredients) =>
       prevIngredients.map((i) =>
-        i.id === id ? { ...i, name, category, isPublic } : i,
+        i.id === id ? { ...i, name, category, isPublic, tags } : i,
       ),
     );
   };
@@ -246,7 +249,8 @@ function AppRoutes() {
     const newIngredient = await addIngredient(
       publicIngredient.name,
       publicIngredient.category,
-      false // copied ingredients are not public by default
+      false, // copied ingredients are not public by default
+      publicIngredient.tags || [] // copy tags from source
     );
     return newIngredient;
   };

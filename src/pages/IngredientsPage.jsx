@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Edit2, Trash2, ArrowLeft, Copy } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, ArrowLeft, Copy, X } from "lucide-react";
 import { INGREDIENT_CATEGORIES, CATEGORY_COLORS } from "../constants";
 import CreateIngredientModal from "../components/common/CreateIngredientModal";
+import TagInput from "../components/common/TagInput";
 
 export default function IngredientsPage({
   ingredients,
@@ -13,6 +14,7 @@ export default function IngredientsPage({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [filterTag, setFilterTag] = useState("");
   const [showDefaultIngredients, setShowDefaultIngredients] = useState(true);
 
   // Combine user ingredients with default ingredients (marked as isDefault)
@@ -33,6 +35,7 @@ export default function IngredientsPage({
   const [editingName, setEditingName] = useState("");
   const [editingCategory, setEditingCategory] = useState("");
   const [editingIsPublic, setEditingIsPublic] = useState(false);
+  const [editingTags, setEditingTags] = useState([]);
   const [sortBy, setSortBy] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
   const [copyingId, setCopyingId] = useState(null);
@@ -65,9 +68,15 @@ export default function IngredientsPage({
     }
   };
 
+  // Get unique tags from all ingredients
+  const allTags = [
+    ...new Set(allIngredients.flatMap((ing) => ing.tags || [])),
+  ].sort();
+
   const filteredIngredients = allIngredients
     .filter((ing) => ing.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter((ing) => !filterCategory || ing.category === filterCategory)
+    .filter((ing) => !filterTag || ing.tags?.includes(filterTag))
     .sort((a, b) => {
       let compare;
       if (sortBy === "name") {
@@ -82,8 +91,8 @@ export default function IngredientsPage({
       return sortDirection === "asc" ? compare : -compare;
     });
 
-  const handleCreate = async (name, category, isPublic) => {
-    await addIngredient(name, category, isPublic);
+  const handleCreate = async (name, category, isPublic, tags) => {
+    await addIngredient(name, category, isPublic, tags);
     setShowCreateModal(false);
   };
 
@@ -92,6 +101,7 @@ export default function IngredientsPage({
     setEditingName(ing.name);
     setEditingCategory(ing.category || INGREDIENT_CATEGORIES[0]);
     setEditingIsPublic(ing.isPublic || false);
+    setEditingTags(ing.tags || []);
   };
 
   const handleSaveEdit = async () => {
@@ -101,11 +111,13 @@ export default function IngredientsPage({
         editingName.trim(),
         editingCategory,
         editingIsPublic,
+        editingTags,
       );
       setEditingId(null);
       setEditingName("");
       setEditingCategory("");
       setEditingIsPublic(false);
+      setEditingTags([]);
     }
   };
 
@@ -149,7 +161,7 @@ export default function IngredientsPage({
             New Ingredient
           </button>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
               Filter by Category:
@@ -167,6 +179,26 @@ export default function IngredientsPage({
               ))}
             </select>
           </div>
+
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
+                Filter by Tag:
+              </span>
+              <select
+                value={filterTag}
+                onChange={(e) => setFilterTag(e.target.value)}
+                style={{ minWidth: "120px" }}
+              >
+                <option value="">All</option>
+                {allTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <label
             className="flex items-center gap-2"
@@ -249,42 +281,48 @@ export default function IngredientsPage({
             >
               {editingId === ing.id ? (
                 <div
-                  className="flex gap-2 flex-1 items-center"
+                  className="flex-1"
                   style={{ marginRight: "16px" }}
                 >
-                  <input
-                    type="text"
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                    style={{ flex: 1, minWidth: "150px" }}
-                    autoFocus
-                  />
-                  <select
-                    value={editingCategory}
-                    onChange={(e) => setEditingCategory(e.target.value)}
-                  >
-                    {INGREDIENT_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                  <label
-                    className="flex items-center gap-1"
-                    style={{ cursor: "pointer", whiteSpace: "nowrap" }}
-                  >
+                  <div className="flex gap-2 items-center mb-2">
                     <input
-                      type="checkbox"
-                      checked={editingIsPublic}
-                      onChange={(e) => setEditingIsPublic(e.target.checked)}
-                      style={{ width: "16px", height: "16px" }}
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      style={{ flex: 1, minWidth: "150px" }}
+                      autoFocus
                     />
-                    <span style={{ fontSize: "14px" }}>Public</span>
-                  </label>
+                    <select
+                      value={editingCategory}
+                      onChange={(e) => setEditingCategory(e.target.value)}
+                    >
+                      {INGREDIENT_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <label
+                      className="flex items-center gap-1"
+                      style={{ cursor: "pointer", whiteSpace: "nowrap" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={editingIsPublic}
+                        onChange={(e) => setEditingIsPublic(e.target.checked)}
+                        style={{ width: "16px", height: "16px" }}
+                      />
+                      <span style={{ fontSize: "14px" }}>Public</span>
+                    </label>
+                  </div>
+                  <TagInput
+                    tags={editingTags}
+                    onChange={setEditingTags}
+                    placeholder="Add tags (press Enter)"
+                  />
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <span className="text-gray-800" style={{ minWidth: "200px" }}>
                     {ing.name}
                   </span>
@@ -301,6 +339,24 @@ export default function IngredientsPage({
                     >
                       {ing.category}
                     </span>
+                  )}
+                  {ing.tags && ing.tags.length > 0 && (
+                    <div className="flex gap-1 flex-wrap" style={{ marginLeft: "8px" }}>
+                      {ing.tags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          style={{
+                            fontSize: "11px",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            backgroundColor: "#dbeafe",
+                            color: "#1e40af",
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
               )}

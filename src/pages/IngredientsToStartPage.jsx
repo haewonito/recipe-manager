@@ -11,6 +11,7 @@ export default function IngredientsToStartPage({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [filterCategory, setFilterCategory] = useState("");
+  const [filterTag, setFilterTag] = useState("");
   const [filterType, setFilterType] = useState("");
   const [copyingId, setCopyingId] = useState(null);
   const [copiedIds, setCopiedIds] = useState(new Set());
@@ -26,9 +27,15 @@ export default function IngredientsToStartPage({
     );
   };
 
+  // Get unique tags from all public ingredients
+  const allTags = [
+    ...new Set(publicIngredients.flatMap((ing) => ing.tags || [])),
+  ].sort();
+
   const filteredIngredients = publicIngredients
     .filter((ing) => ing.name?.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter((ing) => !filterCategory || ing.category === filterCategory)
+    .filter((ing) => !filterTag || ing.tags?.includes(filterTag))
     .filter((ing) => {
       if (!filterType) return true;
       if (filterType === "default") return ing.isDefault === true;
@@ -177,6 +184,26 @@ export default function IngredientsToStartPage({
             </select>
           </div>
 
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
+                Filter by Tag:
+              </span>
+              <select
+                value={filterTag}
+                onChange={(e) => setFilterTag(e.target.value)}
+                style={{ minWidth: "120px" }}
+              >
+                <option value="">All</option>
+                {allTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <button
             onClick={() =>
               setFilterType(filterType === "default" ? "" : "default")
@@ -248,7 +275,7 @@ export default function IngredientsToStartPage({
                   : "transparent",
               }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <div style={{ minWidth: "30px" }}>
                   <input
                     type="checkbox"
@@ -278,6 +305,24 @@ export default function IngredientsToStartPage({
                   >
                     {ing.category}
                   </span>
+                )}
+                {ing.tags && ing.tags.length > 0 && (
+                  <div className="flex gap-1 flex-wrap" style={{ marginLeft: "8px" }}>
+                    {ing.tags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          fontSize: "11px",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          backgroundColor: "#dbeafe",
+                          color: "#1e40af",
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
               <div style={{ minWidth: "150px" }} className="flex justify-end">

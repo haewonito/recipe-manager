@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Search, X } from "lucide-react";
 import IngredientSelector from "../components/ingredients/IngredientSelector";
 import MeasuredIngredientSelector from "../components/ingredients/MeasuredIngredientSelector";
+import TagInput from "../components/common/TagInput";
 
 export default function RecipeFormPage({
   onSave,
@@ -124,6 +125,7 @@ function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
     longInstructionType: "text",
     picture: "",
     isPublic: false,
+    tags: [],
     ...existingRecipe,
   });
 
@@ -262,6 +264,15 @@ function NewRecipeForm({ onSave, ingredients, addIngredient, existingRecipe }) {
         </div>
 
         <div className="form-group">
+          <label>Tags</label>
+          <TagInput
+            tags={formData.tags || []}
+            onChange={(tags) => updateField("tags", tags)}
+            placeholder="Add tags (press Enter)"
+          />
+        </div>
+
+        <div className="form-group">
           <label
             className="flex items-center gap-2"
             style={{ cursor: "pointer" }}
@@ -307,6 +318,7 @@ function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
     longInstructionType: "text",
     picture: "",
     isPublic: false,
+    tags: [],
   });
 
   const handleSubmit = async (e) => {
@@ -424,6 +436,15 @@ function NewRecipeFormContent({ onSave, ingredients, addIngredient }) {
           value={formData.picture}
           onChange={(e) => updateField("picture", e.target.value)}
           placeholder="https://..."
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Tags</label>
+        <TagInput
+          tags={formData.tags || []}
+          onChange={(tags) => updateField("tags", tags)}
+          placeholder="Add tags (press Enter)"
         />
       </div>
 

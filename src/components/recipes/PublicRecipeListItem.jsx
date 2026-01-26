@@ -23,6 +23,24 @@ export default function PublicRecipeListItem({ recipe, isLast, onClick, onCopy, 
               </span>
             )}
           </div>
+          {recipe.tags && recipe.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {recipe.tags.map((tag, idx) => (
+                <span
+                  key={idx}
+                  style={{
+                    fontSize: "10px",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    backgroundColor: "#dbeafe",
+                    color: "#1e40af",
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="flex gap-2">

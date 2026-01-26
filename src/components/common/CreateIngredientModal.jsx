@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { INGREDIENT_CATEGORIES } from "../../constants";
+import TagInput from "./TagInput";
 
 export default function CreateIngredientModal({ onClose, onCreate, initialValue }) {
   const [name, setName] = useState(initialValue);
   const [category, setCategory] = useState(INGREDIENT_CATEGORIES[0]);
   const [isPublic, setIsPublic] = useState(false);
+  const [tags, setTags] = useState([]);
 
   const handleCreate = () => {
     if (name.trim()) {
-      onCreate(name.trim(), category, isPublic);
+      onCreate(name.trim(), category, isPublic, tags);
     }
   };
 
@@ -46,6 +48,16 @@ export default function CreateIngredientModal({ onClose, onCreate, initialValue 
             />
             <span style={{ color: "#374151" }}>Make this ingredient public</span>
           </label>
+          <div className="mb-4">
+            <label style={{ display: "block", marginBottom: "4px", color: "#374151", fontSize: "14px" }}>
+              Tags
+            </label>
+            <TagInput
+              tags={tags}
+              onChange={setTags}
+              placeholder="Add tags (press Enter)"
+            />
+          </div>
           <div className="flex gap-4">
             <button
               type="button"

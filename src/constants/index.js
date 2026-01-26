@@ -39,6 +39,7 @@ export const CATEGORY_COLORS = {
 
 export const RECIPE_CATEGORIES = [
   "Appetizer",
+  "Breakfast",
   "Main",
   "Side",
   "Dessert",

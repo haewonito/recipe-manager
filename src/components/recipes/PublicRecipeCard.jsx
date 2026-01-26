@@ -40,6 +40,24 @@ export default function PublicRecipeCard({ recipe, onClick, onCopy, isCopying, i
             Main: {recipe.mainIngredients.map((i) => i.name).join(", ")}
           </p>
         )}
+        {recipe.tags && recipe.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-3">
+            {recipe.tags.map((tag, idx) => (
+              <span
+                key={idx}
+                style={{
+                  fontSize: "11px",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  backgroundColor: "#dbeafe",
+                  color: "#1e40af",
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

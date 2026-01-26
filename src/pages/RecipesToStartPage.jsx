@@ -18,6 +18,7 @@ export default function RecipesToStartPage({
   const [filterMainIngredient, setFilterMainIngredient] = useState("");
   const [filterCreator, setFilterCreator] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [filterTag, setFilterTag] = useState("");
   const [copyingId, setCopyingId] = useState(null);
   const [copiedIds, setCopiedIds] = useState(new Set());
   const [isCopyingAll, setIsCopyingAll] = useState(false);
@@ -35,6 +36,11 @@ export default function RecipesToStartPage({
   // Get unique creators from all public recipes
   const allCreators = [
     ...new Set(publicRecipes.map((recipe) => recipe.creator).filter(Boolean)),
+  ].sort();
+
+  // Get unique tags from all public recipes
+  const allTags = [
+    ...new Set(publicRecipes.flatMap((recipe) => recipe.tags || [])),
   ].sort();
 
   // Check if recipe is already copied (by sourceRecipeId)
@@ -60,6 +66,7 @@ export default function RecipesToStartPage({
         ),
     )
     .filter((recipe) => !filterCreator || recipe.creator === filterCreator)
+    .filter((recipe) => !filterTag || recipe.tags?.includes(filterTag))
     .filter((recipe) => {
       if (!filterType) return true;
       if (filterType === "default") return recipe.isDefault === true;
@@ -129,7 +136,7 @@ export default function RecipesToStartPage({
 
   const uncopyableAllCount = publicRecipes.filter((r) => !isAlreadyCopied(r.id)).length;
   const uncopyableFilteredCount = sortedRecipes.filter((r) => !isAlreadyCopied(r.id)).length;
-  const hasActiveFilters = filterCategory || filterMainIngredient || filterCreator || filterType || searchTerm;
+  const hasActiveFilters = filterCategory || filterMainIngredient || filterCreator || filterType || filterTag || searchTerm;
 
   return (
     <div className="container">
@@ -243,6 +250,26 @@ export default function RecipesToStartPage({
               ))}
             </select>
           </div>
+
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
+                Filter by Tag:
+              </span>
+              <select
+                value={filterTag}
+                onChange={(e) => setFilterTag(e.target.value)}
+                style={{ minWidth: "120px" }}
+              >
+                <option value="">All</option>
+                {allTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             onClick={() =>
               setFilterType(filterType === "default" ? "" : "default")

@@ -12,6 +12,7 @@ export default function RecipesPage({ recipes, deleteRecipe }) {
   const [viewMode, setViewMode] = useState("grid");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterMainIngredient, setFilterMainIngredient] = useState("");
+  const [filterTag, setFilterTag] = useState("");
 
   const allMainIngredients = [
     ...new Set(
@@ -19,6 +20,10 @@ export default function RecipesPage({ recipes, deleteRecipe }) {
         (recipe) => recipe.mainIngredients?.map((ing) => ing.name) || [],
       ),
     ),
+  ].sort();
+
+  const allTags = [
+    ...new Set(recipes.flatMap((recipe) => recipe.tags || [])),
   ].sort();
 
   const filteredRecipes = recipes
@@ -34,6 +39,9 @@ export default function RecipesPage({ recipes, deleteRecipe }) {
         recipe.mainIngredients?.some(
           (ing) => ing.name === filterMainIngredient,
         ),
+    )
+    .filter(
+      (recipe) => !filterTag || recipe.tags?.includes(filterTag),
     );
 
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
@@ -149,6 +157,26 @@ export default function RecipesPage({ recipes, deleteRecipe }) {
               ))}
             </select>
           </div>
+
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span style={{ color: "#374151", whiteSpace: "nowrap" }}>
+                Filter by Tag:
+              </span>
+              <select
+                value={filterTag}
+                onChange={(e) => setFilterTag(e.target.value)}
+                style={{ minWidth: "120px" }}
+              >
+                <option value="">All</option>
+                {allTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
