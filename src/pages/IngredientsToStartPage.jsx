@@ -222,19 +222,17 @@ export default function IngredientsToStartPage({
               <span style={{ fontWeight: 600 }}>Category</span>
             </div>
             <div style={{ minWidth: "150px" }} className="flex justify-end">
-              {selectedIds.size > 0 && (
-                <button
-                  onClick={handleCopySelected}
-                  disabled={isCopyingMultiple}
-                  className="btn btn-primary flex items-center gap-1"
-                  style={{ padding: "6px 12px", fontSize: "14px" }}
-                >
-                  <Copy className="icon-sm" />
-                  {isCopyingMultiple
-                    ? "Copying..."
-                    : `Copy Selected (${selectedIds.size})`}
-                </button>
-              )}
+              <button
+                onClick={handleCopySelected}
+                disabled={selectedIds.size === 0 || isCopyingMultiple}
+                className="btn btn-primary flex items-center gap-1"
+                style={{ padding: "6px 12px", fontSize: "14px" }}
+              >
+                <Copy className="icon-sm" />
+                {isCopyingMultiple
+                  ? "Copying..."
+                  : `Copy Selected (${selectedIds.size})`}
+              </button>
             </div>
           </div>
 

@@ -20,6 +20,8 @@ export default function RecipesToStartPage({
   const [filterType, setFilterType] = useState("");
   const [copyingId, setCopyingId] = useState(null);
   const [copiedIds, setCopiedIds] = useState(new Set());
+  const [isCopyingAll, setIsCopyingAll] = useState(false);
+  const [isCopyingFiltered, setIsCopyingFiltered] = useState(false);
 
   // Get unique main ingredients from all public recipes
   const allMainIngredients = [
@@ -90,6 +92,44 @@ export default function RecipesToStartPage({
       setCopyingId(null);
     }
   };
+
+  const handleCopyAll = async () => {
+    if (isCopyingAll) return;
+    const recipesToCopy = publicRecipes.filter((r) => !isAlreadyCopied(r.id));
+    if (recipesToCopy.length === 0) return;
+
+    setIsCopyingAll(true);
+    for (const recipe of recipesToCopy) {
+      try {
+        await copyRecipe(recipe);
+        setCopiedIds((prev) => new Set([...prev, recipe.id]));
+      } catch (error) {
+        console.error("Failed to copy recipe:", recipe.title, error);
+      }
+    }
+    setIsCopyingAll(false);
+  };
+
+  const handleCopyFiltered = async () => {
+    if (isCopyingFiltered) return;
+    const recipesToCopy = sortedRecipes.filter((r) => !isAlreadyCopied(r.id));
+    if (recipesToCopy.length === 0) return;
+
+    setIsCopyingFiltered(true);
+    for (const recipe of recipesToCopy) {
+      try {
+        await copyRecipe(recipe);
+        setCopiedIds((prev) => new Set([...prev, recipe.id]));
+      } catch (error) {
+        console.error("Failed to copy recipe:", recipe.title, error);
+      }
+    }
+    setIsCopyingFiltered(false);
+  };
+
+  const uncopyableAllCount = publicRecipes.filter((r) => !isAlreadyCopied(r.id)).length;
+  const uncopyableFilteredCount = sortedRecipes.filter((r) => !isAlreadyCopied(r.id)).length;
+  const hasActiveFilters = filterCategory || filterMainIngredient || filterCreator || filterType || searchTerm;
 
   return (
     <div className="container">
@@ -213,6 +253,31 @@ export default function RecipesToStartPage({
               ? "Showing Default Only"
               : "Show Default Only"}
           </button>
+        </div>
+
+        <div className="flex flex-wrap gap-4 items-center mt-4 pt-4 border-t">
+          <button
+            onClick={handleCopyAll}
+            disabled={isCopyingAll || uncopyableAllCount === 0}
+            className="btn btn-primary flex items-center gap-2"
+          >
+            <Copy className="icon-sm" />
+            {isCopyingAll
+              ? "Copying..."
+              : `Copy All Recipes (${uncopyableAllCount})`}
+          </button>
+          {hasActiveFilters && (
+            <button
+              onClick={handleCopyFiltered}
+              disabled={isCopyingFiltered || uncopyableFilteredCount === 0}
+              className="btn btn-secondary flex items-center gap-2"
+            >
+              <Copy className="icon-sm" />
+              {isCopyingFiltered
+                ? "Copying..."
+                : `Copy Filtered Recipes (${uncopyableFilteredCount})`}
+            </button>
+          )}
         </div>
       </div>
 
