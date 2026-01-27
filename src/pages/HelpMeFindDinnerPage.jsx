@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, X, Search, ChefHat } from "lucide-react";
+import { ArrowLeft, X, Search, ChefHat, Plus } from "lucide-react";
 import { db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import CreateIngredientModal from "../components/common/CreateIngredientModal";
 
 const FRIDGE_SECTIONS = {
   priority: { label: "Priority (Use First!)", color: "#fecaca", textColor: "#991b1b" },
@@ -10,7 +11,7 @@ const FRIDGE_SECTIONS = {
   frozen: { label: "Frozen", color: "#bfdbfe", textColor: "#1e40af" },
 };
 
-export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }) {
+export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user, addIngredient }) {
   const navigate = useNavigate();
   const [fridgeContents, setFridgeContents] = useState({
     priority: [],
@@ -21,6 +22,7 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
   const [showAddModal, setShowAddModal] = useState(false);
   const [addingToSection, setAddingToSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Load fridge contents from Firestore on mount
   useEffect(() => {
@@ -89,6 +91,13 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
     setShowAddModal(false);
     setAddingToSection(null);
     setSearchTerm("");
+  };
+
+  const handleCreateIngredient = async (name, category, isPublic, tags) => {
+    const newIngredient = await addIngredient(name, category, isPublic, tags);
+    setShowCreateModal(false);
+    // Add the new ingredient to the fridge section
+    await addIngredientToSection(newIngredient);
   };
 
   const addIngredientToSection = async (ingredient) => {
@@ -549,17 +558,29 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
               }}
             >
               {availableIngredients.length === 0 ? (
-                <p
+                <div
                   style={{
                     padding: "20px",
                     textAlign: "center",
                     color: "#6b7280",
                   }}
                 >
-                  {searchTerm
-                    ? "No matching ingredients found"
-                    : "All ingredients are already in your fridge!"}
-                </p>
+                  <p style={{ marginBottom: "12px" }}>
+                    {searchTerm
+                      ? "No matching ingredients found"
+                      : "All ingredients are already in your fridge!"}
+                  </p>
+                  {searchTerm && (
+                    <button
+                      onClick={() => setShowCreateModal(true)}
+                      className="btn btn-secondary flex items-center gap-2"
+                      style={{ margin: "0 auto" }}
+                    >
+                      <Plus className="icon-sm" />
+                      Create "{searchTerm}"
+                    </button>
+                  )}
+                </div>
               ) : (
                 availableIngredients.map((ing) => (
                   <div
@@ -596,6 +617,14 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
             </div>
           </div>
         </div>
+      )}
+
+      {showCreateModal && (
+        <CreateIngredientModal
+          onClose={() => setShowCreateModal(false)}
+          onCreate={handleCreateIngredient}
+          initialValue={searchTerm}
+        />
       )}
         </>
       )}
