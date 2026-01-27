@@ -42,6 +42,7 @@ export const RECIPE_CATEGORIES = [
   "Breakfast",
   "Main",
   "Side",
+  "Soup",
   "Dessert",
   "Combination",
 ];

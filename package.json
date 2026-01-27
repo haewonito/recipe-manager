@@ -14,7 +14,8 @@
     "seed": "node src/seedIngredients.js && node src/seedRecipes.js",
     "migrate:isdefault": "node scripts/migrate-ispublic-to-isdefault.js",
     "migrate:creator": "node scripts/migrate-set-creator-userid.js",
-    "migrate:roles": "node scripts/migrate-set-user-roles.js"
+    "migrate:roles": "node scripts/migrate-set-user-roles.js",
+    "import:recipes": "node scripts/importRecipes.js"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
