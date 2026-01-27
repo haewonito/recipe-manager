@@ -287,7 +287,7 @@ function AppRoutes() {
           path="/find-dinner"
           element={
             <ProtectedRoute>
-              <HelpMeFindDinnerPage ingredients={ingredients} />
+              <HelpMeFindDinnerPage ingredients={ingredients} recipes={recipes} user={user} />
             </ProtectedRoute>
           }
         />

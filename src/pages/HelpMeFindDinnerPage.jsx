@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, X, Search } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Plus, X, Search, ChefHat } from "lucide-react";
+import { db } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const FRIDGE_SECTIONS = {
   priority: { label: "Priority (Use First!)", color: "#fecaca", textColor: "#991b1b" },
@@ -8,32 +10,61 @@ const FRIDGE_SECTIONS = {
   frozen: { label: "Frozen", color: "#bfdbfe", textColor: "#1e40af" },
 };
 
-export default function HelpMeFindDinnerPage({ ingredients }) {
+export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }) {
+  const navigate = useNavigate();
   const [fridgeContents, setFridgeContents] = useState({
     priority: [],
     fresh: [],
     frozen: [],
   });
+  const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [addingToSection, setAddingToSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Load fridge contents from localStorage on mount
+  // Load fridge contents from Firestore on mount
   useEffect(() => {
-    const saved = localStorage.getItem("fridgeContents");
-    if (saved) {
-      try {
-        setFridgeContents(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse fridge contents:", e);
-      }
-    }
-  }, []);
+    const loadFridgeContents = async () => {
+      if (!user?.uid) return;
 
-  // Save fridge contents to localStorage when changed
-  useEffect(() => {
-    localStorage.setItem("fridgeContents", JSON.stringify(fridgeContents));
-  }, [fridgeContents]);
+      try {
+        const docRef = doc(db, "fridgeContents", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setFridgeContents({
+            priority: data.priority || [],
+            fresh: data.fresh || [],
+            frozen: data.frozen || [],
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load fridge contents:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadFridgeContents();
+  }, [user?.uid]);
+
+  // Save fridge contents to Firestore when changed
+  const saveFridgeContents = async (newContents) => {
+    if (!user?.uid) return;
+
+    try {
+      const docRef = doc(db, "fridgeContents", user.uid);
+      await setDoc(docRef, {
+        priority: newContents.priority,
+        fresh: newContents.fresh,
+        frozen: newContents.frozen,
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      console.error("Failed to save fridge contents:", error);
+    }
+  };
 
   const openAddModal = (section) => {
     setAddingToSection(section);
@@ -58,26 +89,32 @@ export default function HelpMeFindDinnerPage({ ingredients }) {
       return; // Already in fridge
     }
 
-    setFridgeContents((prev) => ({
-      ...prev,
-      [addingToSection]: [...prev[addingToSection], { id: ingredient.id, name: ingredient.name }],
-    }));
+    const newContents = {
+      ...fridgeContents,
+      [addingToSection]: [...fridgeContents[addingToSection], { id: ingredient.id, name: ingredient.name }],
+    };
+    setFridgeContents(newContents);
+    saveFridgeContents(newContents);
     closeAddModal();
   };
 
   const removeIngredientFromSection = (section, ingredientId) => {
-    setFridgeContents((prev) => ({
-      ...prev,
-      [section]: prev[section].filter((item) => item.id !== ingredientId),
-    }));
+    const newContents = {
+      ...fridgeContents,
+      [section]: fridgeContents[section].filter((item) => item.id !== ingredientId),
+    };
+    setFridgeContents(newContents);
+    saveFridgeContents(newContents);
   };
 
   const moveIngredient = (fromSection, toSection, ingredient) => {
-    setFridgeContents((prev) => ({
-      ...prev,
-      [fromSection]: prev[fromSection].filter((item) => item.id !== ingredient.id),
-      [toSection]: [...prev[toSection], ingredient],
-    }));
+    const newContents = {
+      ...fridgeContents,
+      [fromSection]: fridgeContents[fromSection].filter((item) => item.id !== ingredient.id),
+      [toSection]: [...fridgeContents[toSection], ingredient],
+    };
+    setFridgeContents(newContents);
+    saveFridgeContents(newContents);
   };
 
   // Filter available ingredients (not already in fridge)
@@ -91,6 +128,60 @@ export default function HelpMeFindDinnerPage({ ingredients }) {
     .filter((ing) => !allFridgeIds.has(ing.id))
     .filter((ing) => ing.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Calculate matching recipes
+  const priorityIds = new Set(fridgeContents.priority.map((i) => i.id));
+  const freshIds = new Set(fridgeContents.fresh.map((i) => i.id));
+  const frozenIds = new Set(fridgeContents.frozen.map((i) => i.id));
+
+  const getRecipeMatches = (recipe) => {
+    const allRecipeIngredients = [
+      ...(recipe.mainIngredients || []),
+      ...(recipe.necessaryIngredients || []),
+      ...(recipe.optionalIngredients || []),
+    ];
+
+    const matches = {
+      priority: [],
+      fresh: [],
+      frozen: [],
+      total: 0,
+      priorityCount: 0,
+    };
+
+    allRecipeIngredients.forEach((ing) => {
+      if (priorityIds.has(ing.id)) {
+        matches.priority.push(ing.name);
+        matches.priorityCount++;
+        matches.total++;
+      } else if (freshIds.has(ing.id)) {
+        matches.fresh.push(ing.name);
+        matches.total++;
+      } else if (frozenIds.has(ing.id)) {
+        matches.frozen.push(ing.name);
+        matches.total++;
+      }
+    });
+
+    return matches;
+  };
+
+  const matchingRecipes = recipes
+    .map((recipe) => ({
+      ...recipe,
+      matches: getRecipeMatches(recipe),
+    }))
+    .filter((recipe) => recipe.matches.total > 0)
+    .sort((a, b) => {
+      // First sort by priority matches (descending)
+      if (b.matches.priorityCount !== a.matches.priorityCount) {
+        return b.matches.priorityCount - a.matches.priorityCount;
+      }
+      // Then by total matches (descending)
+      return b.matches.total - a.matches.total;
+    });
+
+  const totalFridgeItems = fridgeContents.priority.length + fridgeContents.fresh.length + fridgeContents.frozen.length;
 
   return (
     <div className="container">
@@ -111,6 +202,12 @@ export default function HelpMeFindDinnerPage({ ingredients }) {
         Tell us what's in your fridge, and we'll help you find the perfect dinner!
       </p>
 
+      {isLoading ? (
+        <div className="text-center" style={{ padding: "40px 0" }}>
+          <p className="text-gray-500">Loading your fridge contents...</p>
+        </div>
+      ) : (
+        <>
       {/* Things in my fridge section */}
       <div className="card card-padding mb-8">
         <h2 className="mb-6" style={{ fontSize: "20px", fontWeight: 600 }}>
@@ -252,6 +349,137 @@ export default function HelpMeFindDinnerPage({ ingredients }) {
         </div>
       </div>
 
+      {/* Recipe Suggestions Section */}
+      <div className="card card-padding mb-8">
+        <h2 className="mb-6" style={{ fontSize: "20px", fontWeight: 600 }}>
+          🍳 Recipe Suggestions
+        </h2>
+
+        {totalFridgeItems === 0 ? (
+          <p className="text-gray-500 text-center" style={{ padding: "40px 0" }}>
+            Add ingredients to your fridge to see recipe suggestions!
+          </p>
+        ) : matchingRecipes.length === 0 ? (
+          <p className="text-gray-500 text-center" style={{ padding: "40px 0" }}>
+            No recipes found matching your fridge ingredients. Try adding more items!
+          </p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {matchingRecipes.map((recipe) => (
+              <div
+                key={recipe.id}
+                onClick={() => navigate(`/recipes/${recipe.id}`)}
+                className="flex items-start gap-4 p-4"
+                style={{
+                  backgroundColor: recipe.matches.priorityCount > 0 ? "#fef2f2" : "#f9fafb",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  border: recipe.matches.priorityCount > 0 ? "2px solid #fecaca" : "1px solid #e5e7eb",
+                }}
+              >
+                <div
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    borderRadius: "8px",
+                    backgroundColor: "#fff7ed",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  {recipe.picture ? (
+                    <img
+                      src={recipe.picture}
+                      alt={recipe.title}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  ) : (
+                    <ChefHat className="icon-lg text-orange-600" />
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 600 }}>
+                      {recipe.title}
+                    </h3>
+                    {recipe.matches.priorityCount > 0 && (
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          padding: "2px 8px",
+                          borderRadius: "9999px",
+                          backgroundColor: "#fecaca",
+                          color: "#991b1b",
+                        }}
+                      >
+                        🔥 Uses priority items!
+                      </span>
+                    )}
+                  </div>
+
+                  <p style={{ fontSize: "13px", color: "#6b7280", margin: "0 0 8px 0" }}>
+                    {recipe.category} • {recipe.matches.total} ingredient{recipe.matches.total !== 1 ? "s" : ""} you have
+                  </p>
+
+                  <div className="flex flex-wrap gap-1">
+                    {recipe.matches.priority.map((name, idx) => (
+                      <span
+                        key={`priority-${idx}`}
+                        style={{
+                          fontSize: "11px",
+                          padding: "2px 8px",
+                          borderRadius: "9999px",
+                          backgroundColor: "#fecaca",
+                          color: "#991b1b",
+                        }}
+                      >
+                        {name}
+                      </span>
+                    ))}
+                    {recipe.matches.fresh.map((name, idx) => (
+                      <span
+                        key={`fresh-${idx}`}
+                        style={{
+                          fontSize: "11px",
+                          padding: "2px 8px",
+                          borderRadius: "9999px",
+                          backgroundColor: "#bbf7d0",
+                          color: "#166534",
+                        }}
+                      >
+                        {name}
+                      </span>
+                    ))}
+                    {recipe.matches.frozen.map((name, idx) => (
+                      <span
+                        key={`frozen-${idx}`}
+                        style={{
+                          fontSize: "11px",
+                          padding: "2px 8px",
+                          borderRadius: "9999px",
+                          backgroundColor: "#bfdbfe",
+                          color: "#1e40af",
+                        }}
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Add Ingredient Modal */}
       {showAddModal && (
         <div className="modal-overlay">
@@ -327,6 +555,8 @@ export default function HelpMeFindDinnerPage({ ingredients }) {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
