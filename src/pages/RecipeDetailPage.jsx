@@ -13,7 +13,9 @@ export default function RecipeDetailPage({ recipes, publicRecipes = [] }) {
     return (
       <div className="container-small">
         <p>Recipe not found.</p>
-        <Link to="/recipes">Back to Recipes</Link>
+        <button onClick={() => navigate(-1)} style={{ background: "none", color: "#2563eb", cursor: "pointer" }}>
+          Go Back
+        </button>
       </div>
     );
   }
@@ -28,14 +30,14 @@ export default function RecipeDetailPage({ recipes, publicRecipes = [] }) {
   return (
     <div className="container-small">
       <div className="flex items-center justify-between mb-6">
-        <Link
-          to="/recipes"
+        <button
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-600"
           style={{ background: "none" }}
         >
           <ArrowLeft className="icon-md" />
-          Back to Recipes
-        </Link>
+          Back
+        </button>
         {!recipe.isCombination && !isPublicRecipe && (
           <Link to={`/recipes/${recipe.id}/edit`} className="btn btn-blue">
             <Edit2 className="icon-sm" />

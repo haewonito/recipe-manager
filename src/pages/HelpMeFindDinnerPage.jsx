@@ -25,7 +25,12 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
   // Load fridge contents from Firestore on mount
   useEffect(() => {
     const loadFridgeContents = async () => {
-      if (!user?.uid) return;
+      console.log("Loading fridge contents, user:", user?.uid);
+      if (!user?.uid) {
+        console.log("No user uid, skipping load");
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const docRef = doc(db, "fridgeContents", user.uid);
@@ -33,11 +38,14 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
 
         if (docSnap.exists()) {
           const data = docSnap.data();
+          console.log("Loaded fridge data:", data);
           setFridgeContents({
             priority: data.priority || [],
             fresh: data.fresh || [],
             frozen: data.frozen || [],
           });
+        } else {
+          console.log("No fridge document exists yet");
         }
       } catch (error) {
         console.error("Failed to load fridge contents:", error);
@@ -51,7 +59,11 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
 
   // Save fridge contents to Firestore when changed
   const saveFridgeContents = async (newContents) => {
-    if (!user?.uid) return;
+    console.log("Saving fridge contents, user:", user?.uid);
+    if (!user?.uid) {
+      console.log("No user uid, skipping save");
+      return;
+    }
 
     try {
       const docRef = doc(db, "fridgeContents", user.uid);
@@ -61,6 +73,7 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
         frozen: newContents.frozen,
         updatedAt: new Date(),
       });
+      console.log("Fridge contents saved successfully");
     } catch (error) {
       console.error("Failed to save fridge contents:", error);
     }
@@ -78,7 +91,7 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
     setSearchTerm("");
   };
 
-  const addIngredientToSection = (ingredient) => {
+  const addIngredientToSection = async (ingredient) => {
     // Check if already in any section
     const allItems = [
       ...fridgeContents.priority,
@@ -94,27 +107,27 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
       [addingToSection]: [...fridgeContents[addingToSection], { id: ingredient.id, name: ingredient.name }],
     };
     setFridgeContents(newContents);
-    saveFridgeContents(newContents);
+    await saveFridgeContents(newContents);
     closeAddModal();
   };
 
-  const removeIngredientFromSection = (section, ingredientId) => {
+  const removeIngredientFromSection = async (section, ingredientId) => {
     const newContents = {
       ...fridgeContents,
       [section]: fridgeContents[section].filter((item) => item.id !== ingredientId),
     };
     setFridgeContents(newContents);
-    saveFridgeContents(newContents);
+    await saveFridgeContents(newContents);
   };
 
-  const moveIngredient = (fromSection, toSection, ingredient) => {
+  const moveIngredient = async (fromSection, toSection, ingredient) => {
     const newContents = {
       ...fridgeContents,
       [fromSection]: fridgeContents[fromSection].filter((item) => item.id !== ingredient.id),
       [toSection]: [...fridgeContents[toSection], ingredient],
     };
     setFridgeContents(newContents);
-    saveFridgeContents(newContents);
+    await saveFridgeContents(newContents);
   };
 
   // Filter available ingredients (not already in fridge)
@@ -145,11 +158,34 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
   const frozenIds = new Set(fridgeContents.frozen.map((i) => i.id));
 
   const getRecipeMatches = (recipe) => {
-    const allRecipeIngredients = [
+    let allRecipeIngredients = [
       ...(recipe.mainIngredients || []),
       ...(recipe.necessaryIngredients || []),
       ...(recipe.optionalIngredients || []),
     ];
+
+    // For combination recipes, also include ingredients from sub-recipes
+    if (recipe.isCombination && recipe.subRecipes) {
+      recipe.subRecipes.forEach((subRef) => {
+        const subRecipe = recipes.find((r) => r.id === subRef.id);
+        if (subRecipe) {
+          allRecipeIngredients = [
+            ...allRecipeIngredients,
+            ...(subRecipe.mainIngredients || []),
+            ...(subRecipe.necessaryIngredients || []),
+            ...(subRecipe.optionalIngredients || []),
+          ];
+        }
+      });
+    }
+
+    // Deduplicate ingredients by id
+    const seenIds = new Set();
+    allRecipeIngredients = allRecipeIngredients.filter((ing) => {
+      if (seenIds.has(ing.id)) return false;
+      seenIds.add(ing.id);
+      return true;
+    });
 
     const matches = {
       priority: [],
@@ -176,7 +212,17 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
     return matches;
   };
 
-  const matchingRecipes = recipes
+  // Deduplicate recipes by title (case-insensitive), keeping the first occurrence
+  const deduplicatedRecipes = recipes.reduce((acc, recipe) => {
+    const titleLower = recipe.title.toLowerCase().trim();
+    if (!acc.seen.has(titleLower)) {
+      acc.seen.add(titleLower);
+      acc.list.push(recipe);
+    }
+    return acc;
+  }, { seen: new Set(), list: [] }).list;
+
+  const matchingRecipes = deduplicatedRecipes
     .map((recipe) => ({
       ...recipe,
       matches: getRecipeMatches(recipe),
