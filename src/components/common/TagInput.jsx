@@ -54,7 +54,7 @@ export default function TagInput({ tags = [], onChange, placeholder = "Add tag..
             fontSize: "13px",
           }}
         >
-          {tag}
+          #{tag}
           <button
             type="button"
             onClick={() => removeTag(index)}

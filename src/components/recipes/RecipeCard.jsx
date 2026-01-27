@@ -29,7 +29,7 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete }) {
         <div className="flex flex-wrap gap-2 items-center">
           <span className="badge badge-orange">{recipe.category}</span>
           {recipe.tags && recipe.tags.map((tag, idx) => (
-            <span key={idx} className="badge badge-blue">{tag}</span>
+            <span key={idx} className="badge badge-blue">#{tag}</span>
           ))}
         </div>
         {recipe.mainIngredients.length > 0 && (

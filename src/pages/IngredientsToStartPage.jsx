@@ -319,7 +319,7 @@ export default function IngredientsToStartPage({
                           color: "#1e40af",
                         }}
                       >
-                        {tag}
+                        #{tag}
                       </span>
                     ))}
                   </div>

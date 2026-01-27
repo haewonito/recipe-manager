@@ -18,7 +18,7 @@ export default function PublicRecipeListItem({ recipe, isLast, onClick, onCopy, 
           <div className="recipe-list-meta">
             <span className="recipe-list-category">{recipe.category}</span>
             {recipe.tags && recipe.tags.map((tag, idx) => (
-              <span key={idx} className="recipe-list-tag">{tag}</span>
+              <span key={idx} className="recipe-list-tag">#{tag}</span>
             ))}
             {recipe.mainIngredients?.length > 0 && (
               <span className="recipe-list-ingredients">
