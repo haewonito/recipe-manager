@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, X, Search, ChefHat } from "lucide-react";
+import { ArrowLeft, X, Search, ChefHat } from "lucide-react";
 import { db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -235,50 +235,20 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
                 minHeight: "200px",
               }}
             >
-              <div className="flex justify-between items-center mb-4">
-                <h3
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    color: sectionConfig.textColor,
-                    margin: 0,
-                  }}
-                >
-                  {sectionConfig.label}
-                </h3>
-                <button
-                  onClick={() => openAddModal(sectionKey)}
-                  className="btn-icon"
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: "50%",
-                    width: "28px",
-                    height: "28px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                  title="Add ingredient"
-                >
-                  <Plus size={16} color={sectionConfig.textColor} />
-                </button>
-              </div>
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  color: sectionConfig.textColor,
+                  margin: 0,
+                  marginBottom: "16px",
+                }}
+              >
+                {sectionConfig.label}
+              </h3>
 
               <div className="flex flex-col gap-2">
-                {fridgeContents[sectionKey].length === 0 ? (
-                  <p
-                    style={{
-                      color: sectionConfig.textColor,
-                      opacity: 0.6,
-                      fontSize: "14px",
-                      textAlign: "center",
-                      padding: "20px 0",
-                    }}
-                  >
-                    No items yet
-                  </p>
-                ) : (
-                  fridgeContents[sectionKey].map((item) => (
+                {fridgeContents[sectionKey].map((item) => (
                     <div
                       key={item.id}
                       className="flex items-center justify-between"
@@ -351,8 +321,23 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
                         </button>
                       </div>
                     </div>
-                  ))
-                )}
+                  ))}
+                  {/* Add an ingredient button */}
+                  <div
+                    onClick={() => openAddModal(sectionKey)}
+                    className="flex items-center justify-center"
+                    style={{
+                      backgroundColor: "rgba(255, 255, 255, 0.6)",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      border: "1px dashed rgba(0, 0, 0, 0.2)",
+                    }}
+                  >
+                    <span style={{ fontSize: "14px", color: sectionConfig.textColor, opacity: 0.8 }}>
+                      + add an ingredient
+                    </span>
+                  </div>
               </div>
             </div>
           ))}
