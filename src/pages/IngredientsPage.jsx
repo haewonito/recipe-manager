@@ -17,16 +17,26 @@ export default function IngredientsPage({
   const [filterTag, setFilterTag] = useState("");
   const [showDefaultIngredients, setShowDefaultIngredients] = useState(true);
 
+  // Deduplicate user ingredients by name (case-insensitive), keeping the first occurrence
+  const deduplicatedUserIngredients = ingredients.reduce((acc, ing) => {
+    const nameLower = ing.name.toLowerCase().trim();
+    if (!acc.seen.has(nameLower)) {
+      acc.seen.add(nameLower);
+      acc.list.push(ing);
+    }
+    return acc;
+  }, { seen: new Set(), list: [] }).list;
+
   // Combine user ingredients with default ingredients (marked as isDefault)
   // Filter out default ingredients that user has already copied (by name)
   const userIngredientNames = new Set(
-    ingredients.map((ing) => ing.name.toLowerCase()),
+    deduplicatedUserIngredients.map((ing) => ing.name.toLowerCase().trim()),
   );
   const allIngredients = [
-    ...ingredients.map((ing) => ({ ...ing, isDefaultIngredient: false })),
+    ...deduplicatedUserIngredients.map((ing) => ({ ...ing, isDefaultIngredient: false })),
     ...(showDefaultIngredients
       ? defaultIngredients
-          .filter((ing) => !userIngredientNames.has(ing.name.toLowerCase()))
+          .filter((ing) => !userIngredientNames.has(ing.name.toLowerCase().trim()))
           .map((ing) => ({ ...ing, isDefaultIngredient: true }))
       : []),
   ];

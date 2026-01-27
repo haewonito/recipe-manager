@@ -124,7 +124,17 @@ export default function HelpMeFindDinnerPage({ ingredients, recipes = [], user }
     ...fridgeContents.frozen.map((i) => i.id),
   ]);
 
-  const availableIngredients = ingredients
+  // Deduplicate ingredients by name (case-insensitive), keeping the first occurrence
+  const deduplicatedIngredients = ingredients.reduce((acc, ing) => {
+    const nameLower = ing.name.toLowerCase().trim();
+    if (!acc.seen.has(nameLower)) {
+      acc.seen.add(nameLower);
+      acc.list.push(ing);
+    }
+    return acc;
+  }, { seen: new Set(), list: [] }).list;
+
+  const availableIngredients = deduplicatedIngredients
     .filter((ing) => !allFridgeIds.has(ing.id))
     .filter((ing) => ing.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));

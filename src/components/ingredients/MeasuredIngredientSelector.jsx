@@ -14,7 +14,17 @@ export default function MeasuredIngredientSelector({
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  const filteredIngredients = allIngredients.filter(
+  // Deduplicate ingredients by name (case-insensitive), keeping the first occurrence
+  const deduplicatedIngredients = allIngredients.reduce((acc, ing) => {
+    const nameLower = ing.name.toLowerCase().trim();
+    if (!acc.seen.has(nameLower)) {
+      acc.seen.add(nameLower);
+      acc.list.push(ing);
+    }
+    return acc;
+  }, { seen: new Set(), list: [] }).list;
+
+  const filteredIngredients = deduplicatedIngredients.filter(
     (ing) =>
       ing.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       !selectedIngredients.find((s) => s.ingredient?.id === ing.id)
