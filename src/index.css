@@ -386,6 +386,15 @@ label {
   background: #86efac;
 }
 
+.menu-card.purple {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+}
+
+.menu-card.purple:hover {
+  background: #ddd6fe;
+}
+
 .menu-card h2 {
   font-size: 24px;
   font-weight: 700;

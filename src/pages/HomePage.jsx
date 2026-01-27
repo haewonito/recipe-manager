@@ -50,6 +50,10 @@ export default function HomePage() {
       </div>
 
       <div className="flex flex-col gap-6">
+        <Link to="/find-dinner" className="menu-card purple">
+          <h2>🍽️ Help Me Find Dinner</h2>
+          <p>Tell us what's in your fridge, and we'll help you find the perfect meal!</p>
+        </Link>
         <Link to="/recipes" className="menu-card">
           <h2>My Recipes</h2>
           <p>View and manage your recipe collection</p>

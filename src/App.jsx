@@ -24,6 +24,7 @@ import IngredientsPage from "./pages/IngredientsPage";
 import RecipesToStartPage from "./pages/RecipesToStartPage";
 import IngredientsToStartPage from "./pages/IngredientsToStartPage";
 import DefaultRecipesPage from "./pages/DefaultRecipesPage";
+import HelpMeFindDinnerPage from "./pages/HelpMeFindDinnerPage";
 
 function ProtectedRoute({ children }) {
   const { user, hasCompletedProfile } = useAuth();
@@ -279,6 +280,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/find-dinner"
+          element={
+            <ProtectedRoute>
+              <HelpMeFindDinnerPage ingredients={ingredients} />
             </ProtectedRoute>
           }
         />
